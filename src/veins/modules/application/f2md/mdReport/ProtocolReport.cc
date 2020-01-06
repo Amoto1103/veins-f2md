@@ -21,12 +21,18 @@ void ProtocolReport::setReportedCheck(BsmCheck reportedCheck) {
 }
 
 void ProtocolReport::addBsmToList(BasicSafetyMessage bsm, BsmCheck check) {
-    this->bsmList[bsmListNum] = bsm;
-    this->checksList[bsmListNum] = check;
-    bsmListNum++;
+    if(bsmListNum<MAX_EVI_BSM_PROTO){
+        if (bsm.getSenderPseudonym() == 0) {
+            std: cout << "addBsmToList Error Found \n";
+            exit(0);
+        }
+        this->bsmList[bsmListNum] = bsm;
+        this->checksList[bsmListNum] = check;
+        bsmListNum++;
+    }
 }
 
-void ProtocolReport::addEvidence(BasicSafetyMessage myBsm, bool initial,
+void ProtocolReport::addEvidence(BasicSafetyMessage myBsm,
         BsmCheck reportedCheck, BasicSafetyMessage receivedBsm,
         NodeTable * detectedNodes, double curTime, double deltaTime,
         int version) {
@@ -35,30 +41,35 @@ void ProtocolReport::addEvidence(BasicSafetyMessage myBsm, bool initial,
 
     int histAdd = 0;
     double addedBsmTime = curTime;
-    if (initial) {
-        setReportedCheck(reportedCheck);
-        addBsmToList(receivedBsm, reportedCheck);
-        addedBsmTime = receivedBsm.getArrivalTime().dbl();
-        histAdd = 1;
-    } else {
-        setReportedCheck(
-                detectedNodes->getMDMHistoryAddr(reportedPseudo)->getBsmCheck(
-                        histAdd, version));
+
+    setReportedCheck(reportedCheck);
+    addBsmToList(receivedBsm, reportedCheck);
+    addedBsmTime = receivedBsm.getArrivalTime().dbl();
+
+    if (detectedNodes->includes(reportedPseudo)) {
+        NodeHistory * NodeHistoryAddr = detectedNodes->getNodeHistoryAddr(
+                reportedPseudo);
+        MDMHistory * MDMHistoryAddr = detectedNodes->getMDMHistoryAddr(
+                reportedPseudo);
+
+        if (NodeHistoryAddr->getBSMNum() > 0) {
+            double savedArrivalTime =
+                    NodeHistoryAddr->getLatestBSMAddr()->getArrivalTime().dbl();
+            if (savedArrivalTime == addedBsmTime) {
+                histAdd = 1;
+            }
+        }
+
+        while (((curTime - addedBsmTime) < deltaTime)
+                && histAdd < NodeHistoryAddr->getBSMNum()) {
+            addBsmToList(*NodeHistoryAddr->getBSMAddr(histAdd),
+                    MDMHistoryAddr->getBsmCheck(histAdd, version));
+            addedBsmTime =
+                    NodeHistoryAddr->getBSMAddr(histAdd)->getArrivalTime().dbl();
+            histAdd++;
+        }
     }
 
-    do {
-        addBsmToList(
-                *detectedNodes->getNodeHistoryAddr(reportedPseudo)->getBSMAddr(
-                        histAdd),
-                detectedNodes->getMDMHistoryAddr(reportedPseudo)->getBsmCheck(
-                        histAdd, version));
-        addedBsmTime =
-                detectedNodes->getNodeHistoryAddr(reportedPseudo)->getBSMAddr(
-                        histAdd)->getArrivalTime().dbl();
-        histAdd++;
-    } while (((curTime - addedBsmTime) < deltaTime)
-            && histAdd
-                    < detectedNodes->getNodeHistoryAddr(reportedPseudo)->getBSMNum());
 
     if (reportedCheck.getRangePlausibility() < 1) {
         addBsmToList(myBsm, BsmCheck());
@@ -67,27 +78,45 @@ void ProtocolReport::addEvidence(BasicSafetyMessage myBsm, bool initial,
 
     for (int var = 0; var < reportedCheck.getIntersection().getInterNum();
             var++) {
-        if (reportedCheck.getIntersection().getInterValue(var) < 1) {
 
+        if (reportedCheck.getIntersection().getInterValue(var) < 1) {
             if (senderPseudonym
                     == reportedCheck.getIntersection().getInterId(var)) {
+
                 if (!myBsmAdded) {
                     addBsmToList(myBsm, BsmCheck());
                 }
             } else {
-                if (detectedNodes->includes(
-                        reportedCheck.getIntersection().getInterId(var))) {
 
-                    addBsmToList(
-                            *detectedNodes->getNodeHistoryAddr(
-                                    reportedCheck.getIntersection().getInterId(
-                                            var))->getLatestBSMAddr(),
-                            detectedNodes->getMDMHistoryAddr(
-                                    reportedCheck.getIntersection().getInterId(
-                                            var))->getBsmCheck(0, version));
+                unsigned long pseudiInt =
+                        reportedCheck.getIntersection().getInterId(var);
+                if (detectedNodes->includes(pseudiInt)) {
+                    NodeHistory * NodeHistoryAddrInt =
+                            detectedNodes->getNodeHistoryAddr(pseudiInt);
+                    MDMHistory * MDMHistoryAddrInt =
+                            detectedNodes->getMDMHistoryAddr(pseudiInt);
+
+                    if (NodeHistoryAddrInt->getBSMNum() > 0
+                            && MDMHistoryAddrInt->getMDMNum(version) > 0) {
+                        BasicSafetyMessage * BSMInt =
+                                NodeHistoryAddrInt->getLatestBSMAddr();
+                        BsmCheck * BsmCheckInt =
+                                MDMHistoryAddrInt->getLatestBsmCheckAddr(
+                                        version);
+
+                        addBsmToList(*BSMInt, *BsmCheckInt);
+                    }
+
                 }
             }
         }
+    }
+
+    if (bsmListNum == 0) {
+        std::cout << "ProtocolReport::addEvidence bsmListNum==0" << "\n";
+        ReportPrintable rp;
+        std::cout << rp.getBsmJson(receivedBsm) << "\n";
+        exit(0);
     }
 
 }

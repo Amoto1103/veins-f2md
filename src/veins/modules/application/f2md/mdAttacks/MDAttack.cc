@@ -408,6 +408,8 @@ BasicSafetyMessage MDAttack::launchAttack(attackTypes::Attacks myAttackType,
             attackBsm = *detectedNodes->getRandomBSM();
             targetNode = attackBsm.getSenderPseudonym();
             attackBsm.setSenderPseudonym(*myPseudonym);
+        }else{
+            attackBsm.setSenderPseudonym(0);
         }
     }
         break;
@@ -427,6 +429,8 @@ BasicSafetyMessage MDAttack::launchAttack(attackTypes::Attacks myAttackType,
             saveAttackBsm = attackBsm;
             targetNode = attackBsm.getSenderPseudonym();
             attackBsm.setSenderPseudonym(*myPseudonym);
+        }else{
+            attackBsm.setSenderPseudonym(0);
         }
     }
         break;
@@ -898,6 +902,8 @@ BasicSafetyMessage MDAttack::launchAttack(attackTypes::Attacks myAttackType,
             saveAttackBsm = attackBsm;
             targetNode = attackBsm.getSenderPseudonym();
             attackBsm.setSenderPseudonym(SybilPseudonyms[0]);
+        }else{
+            attackBsm.setSenderPseudonym(0);
         }
     }
         break;

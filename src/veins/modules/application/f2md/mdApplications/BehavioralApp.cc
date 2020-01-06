@@ -32,291 +32,22 @@ BehavioralApp::BehavioralApp(int version,
 bool BehavioralApp::CheckNodeForReport(unsigned long myPseudonym,
         BasicSafetyMessage * bsm, BsmCheck * bsmCheck, NodeTable * detectedNodes) {
 
-    MDReport mbReport;
-
-    double tempFactor = 0;
-    minFactor = 1;
-
     prntApp->incAll(mbTypes::intMbs[bsm->getSenderMbType()]);
     prntAppInst->incAll(mbTypes::intMbs[bsm->getSenderMbType()]);
+    calculateMinFactor(bsmCheck);
+    incrementDetailedFlags(bsm,bsmCheck,Threshold);
 
     unsigned long senderId = bsm->getSenderPseudonym();
 
-    //std::cout<< "RangePlausibility" << '\n';
-
-    tempFactor = bsmCheck->getRangePlausibility();
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
-    if (tempFactor < Threshold) {
-        prntApp->incFlags(mdChecksTypes::RangePlausibility,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::RangePlausibility,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-    }
-
-    //std::cout<< "PositionConsistancy" << '\n';
-    tempFactor = bsmCheck->getPositionConsistancy();
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
-    if (tempFactor < Threshold) {
-        prntApp->incFlags(mdChecksTypes::PositionConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::PositionConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-    }
-
-    //std::cout<< "PositionSpeedConsistancy" << '\n';
-
-    tempFactor = bsmCheck->getPositionSpeedConsistancy();
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
-    if (tempFactor < Threshold) {
-        prntApp->incFlags(mdChecksTypes::PositionSpeedConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::PositionSpeedConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-    }
-
-    //std::cout<< "PositionSpeedMaxConsistancy" << '\n';
-
-    tempFactor = bsmCheck->getPositionSpeedMaxConsistancy();
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
-    if (tempFactor < Threshold) {
-        prntApp->incFlags(mdChecksTypes::PositionSpeedMaxConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::PositionSpeedMaxConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-    }
-
-    //std::cout<< "SpeedConsistancy" << '\n';
-
-    tempFactor = bsmCheck->getSpeedConsistancy();
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
-    if (tempFactor < Threshold) {
-        prntApp->incFlags(mdChecksTypes::SpeedConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::SpeedConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-    }
-
-    //std::cout<< "SpeedPlausibility" << '\n';
-
-    tempFactor = bsmCheck->getSpeedPlausibility();
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
-    if (tempFactor < Threshold) {
-        prntApp->incFlags(mdChecksTypes::SpeedPlausibility,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::SpeedPlausibility,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-    }
-
-    //std::cout<< "PositionPlausibility" << '\n';
-
-    tempFactor = bsmCheck->getPositionPlausibility();
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
-    if (tempFactor < Threshold) {
-        prntApp->incFlags(mdChecksTypes::PositionPlausibility,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::PositionPlausibility,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-    }
-
-    //std::cout<< "BeaconFrequency" << '\n';
-
-    tempFactor = bsmCheck->getBeaconFrequency();
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
-    if (tempFactor < Threshold) {
-        prntApp->incFlags(mdChecksTypes::BeaconFrequency,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::BeaconFrequency,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-    }
-
-    //std::cout<< "SuddenAppearence" << '\n';
-    tempFactor = bsmCheck->getSuddenAppearence();
-    if (tempFactor < minFactor) {
-        //std::cout<< "SuddenAppearence" << '\n';
-        //     minFactor = tempFactor;
-    }
-    if (tempFactor < Threshold) {
-        prntApp->incFlags(mdChecksTypes::SuddenAppearence,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::SuddenAppearence,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-    }
-
-    //std::cout<< "PositionHeadingConsistancy" << '\n';
-    tempFactor = bsmCheck->getPositionHeadingConsistancy();
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
-    if (tempFactor < Threshold) {
-        prntApp->incFlags(mdChecksTypes::PositionHeadingConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::PositionHeadingConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-    }
-
-
-    //std::cout<< "kalmanPSCP" << '\n';
-    if (bsmCheck->getKalmanPSCP() < minFactor) {
-        minFactor = bsmCheck->getKalmanPSCP();
-    }
-    if (bsmCheck->getKalmanPSCP() < Threshold) {
-
-        prntApp->incFlags(mdChecksTypes::kalmanPSCP,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::kalmanPSCP,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-    }
-
-    //std::cout<< "kalmanPSCS" << '\n';
-    if (bsmCheck->getKalmanPSCS() < minFactor) {
-        minFactor = bsmCheck->getKalmanPSCS();
-    }
-    if (bsmCheck->getKalmanPSCS() < Threshold) {
-
-        prntApp->incFlags(mdChecksTypes::kalmanPSCS,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::kalmanPSCS,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-    }
-
-    //std::cout<< "kalmanPSCSP" << '\n';
-    if (bsmCheck->getKalmanPSCSP() < minFactor) {
-        minFactor = bsmCheck->getKalmanPSCSP();
-    }
-    if (bsmCheck->getKalmanPSCSP() < Threshold) {
-
-        prntApp->incFlags(mdChecksTypes::kalmanPSCSP,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::kalmanPSCSP,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-    }
-
-    //std::cout<< "kalmanPSCSS" << '\n';
-    if (bsmCheck->getKalmanPSCSS() < minFactor) {
-        minFactor = bsmCheck->getKalmanPSCSS();
-    }
-    if (bsmCheck->getKalmanPSCSS() < Threshold) {
-
-        prntApp->incFlags(mdChecksTypes::kalmanPSCSS,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::kalmanPSCSS,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-    }
-
-    //std::cout<< "kalmanPCS" << '\n';
-
-    if (bsmCheck->getKalmanPCC() < minFactor) {
-        minFactor = bsmCheck->getKalmanPCC();
-    }
-    if (bsmCheck->getKalmanPCC() < Threshold) {
-
-        prntApp->incFlags(mdChecksTypes::kalmanPCC,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::kalmanPCC,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-    }
-
-    //std::cout<< "kalmanPACS" << '\n';
-
-    if (bsmCheck->getKalmanPACS() < minFactor) {
-        minFactor = bsmCheck->getKalmanPACS();
-    }
-    if (bsmCheck->getKalmanPACS() < Threshold) {
-        prntApp->incFlags(mdChecksTypes::kalmanPACS,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::kalmanPACS,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-    }
-
-    //std::cout<< "kalmanSCC" << '\n';
-    if (bsmCheck->getKalmanSCC() < minFactor) {
-        minFactor = bsmCheck->getKalmanSCC();
-    }
-    if (bsmCheck->getKalmanSCC() < Threshold) {
-        prntApp->incFlags(mdChecksTypes::kalmanSCC,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::kalmanSCC,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-    }
-
-    InterTest inter = bsmCheck->getIntersection();
-    for (int var = 0; var < inter.getInterNum(); ++var) {
-        double curInferFactor = inter.getInterValue(var);
-        //std::cout<< "Intersection" << '\n';
-        tempFactor = curInferFactor;
-        if (tempFactor < minFactor) {
-            minFactor = tempFactor;
-        }
-        if (tempFactor < Threshold) {
-            prntApp->incFlags(mdChecksTypes::Intersection,
-                    mbTypes::intMbs[bsm->getSenderMbType()]);
-            prntAppInst->incFlags(mdChecksTypes::Intersection,
-                    mbTypes::intMbs[bsm->getSenderMbType()]);
-        }
-    }
 
     bool checkFailed = false;
-
     int indexTMO = getIndexTMO(senderId);
-
     if (minFactor < 1) {
 
         if (indexTMO == -1) {
             indexTMO = addPseudoTMO(senderId);
         }
-
-        double TMOadd = 0;
-        //        int TMOadd = 10*(Threshold - minFactor);
-        double augFactor = exp(TimeOut[indexTMO]+2 / 2) / 2.9;
-
-        if (augFactor > 20) {
-            augFactor = 20;
-        }
-        augFactor = 1;
-        double expAdd = 10 * (1 - minFactor);
-        double expV = expAdd / 1.1 - 6;
-        if(minFactor<=0){
-            TMOadd = (exp(expV) + 0.5)* augFactor;
-        }else{
-            TMOadd = (exp(expV) + 0.5);
-        }
-
-//        for (double var = 1; var >= 0; var = var - 0.1) {
-//            double expAdd = 10 * (1 - var);
-//            double expV = expAdd / 3 - 3;
-//            int TMOadd = exp(expV) + 0.5;
-//            std::cout << var << " " << expAdd << " " << expV << " " << TMOadd
-//                    << "\n";
-//        }
-//
-//        for (double var = 0; var < 10; ++var) {
-//            double RealAdd = exp(var/5);
-//            std::cout << var << " RealAdd:" << RealAdd <<" "<< (1- 1/RealAdd)<< "\n";
-//        }
-//        exit(0);
-
-//        if(expAdd>=10){
-//            TMOadd = 10;
-//        }else{
-//            TMOadd = 0;
-//        }
-
+        double TMOadd = 0.0005*exp(10 * (1 - minFactor));
 
         TimeOut[indexTMO] = TimeOut[indexTMO] + TMOadd;
         UpdatedTMO[TimeOutNum] = simTime().dbl();
@@ -324,13 +55,18 @@ bool BehavioralApp::CheckNodeForReport(unsigned long myPseudonym,
 
     if (indexTMO >= 0) {
         if (TimeOut[indexTMO] > 0) {
-            prntApp->incCumulFlags(mbTypes::intMbs[bsm->getSenderMbType()]);
-            prntAppInst->incCumulFlags(mbTypes::intMbs[bsm->getSenderMbType()]);
-            bsmCheck->setReported(true);
-            checkFailed = true;
+            if(TimeOut[indexTMO] > 5.5066){
+                prntApp->incCumulFlags(mbTypes::intMbs[bsm->getSenderMbType()]);
+                prntAppInst->incCumulFlags(mbTypes::intMbs[bsm->getSenderMbType()]);
+                bsmCheck->setReported(true);
+                checkFailed = true;
+            }
             TimeOut[indexTMO] = TimeOut[indexTMO] - 1;
+            if(TimeOut[indexTMO]<=0){
+                TimeOut[indexTMO] == 0;
+            }
         }
-        if (TimeOut[indexTMO] == 0) {
+        if (TimeOut[indexTMO] <=0) {
             removePseudoTMO(indexTMO);
         }
     }

@@ -24,7 +24,6 @@ class NodeHistory {
         unsigned long nodePseudonym;
         int bsmNum;
         BasicSafetyMessage bsmList[MAX_BSM_LENGTH];
-        BasicSafetyMessage* getBSMList();
 
     public:
         NodeHistory();

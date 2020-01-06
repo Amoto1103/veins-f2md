@@ -53,9 +53,11 @@ public:
     MDMHistory();
     MDMHistory(unsigned long);
     int getMDMNumV1();
+    int getMDMNum(int version);
     int getMDMNumV2();
 
     BsmCheck getBsmCheck(int index, int version);
+    BsmCheck* getLatestBsmCheckAddr(int version);
 
     void addBsmCheck(BsmCheck bsmCheck, int version);
 

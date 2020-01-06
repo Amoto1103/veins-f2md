@@ -35,7 +35,7 @@ private:
 
     std::string getBsmPrintHead();
 
-    std::string getSelfBsmPrintHead();
+    std::string getSelfBsmPrintHead(std::string myVType);
 
 public:
 
@@ -54,7 +54,7 @@ public:
             const std::string curDate);
 
 
-    std::string getSelfBsmPrintableJson();
+    std::string getSelfBsmPrintableJson(std::string myVType);
 
     bool writeSelfStrToFile(const std::string strFileCnst,
             const std::string serial, const std::string outStr,

@@ -23,10 +23,10 @@
 using namespace std;
 using namespace boost;
 
-AggrigationApp::AggrigationApp(int version, double devValue, double deltaTrustTime,
+AggrigationApp::AggrigationApp(int version,double Threshold ,double devValue, double deltaTrustTime,
         int maxBsmTrustNum) :
         MDApplication(version) {
-
+    this->Threshold = Threshold;
     this->devValue = devValue;
     this->deltaTrustTime = deltaTrustTime;
     this->maxBsmTrustNum = maxBsmTrustNum;
@@ -36,13 +36,13 @@ bool AggrigationApp::CheckNodeForReport(unsigned long myPseudonym,
         BasicSafetyMessage * bsm, BsmCheck * bsmCheck, NodeTable * detectedNodes) {
 
     bool checkFailed = false;
-    MDReport mbReport;
 
     double tempFactor = 0;
-    minFactor = 1;
-
     prntApp->incAll(mbTypes::intMbs[bsm->getSenderMbType()]);
     prntAppInst->incAll(mbTypes::intMbs[bsm->getSenderMbType()]);
+    calculateMinFactor(bsmCheck);
+    incrementDetailedFlags(bsm,bsmCheck,Threshold);
+
 
     unsigned long senderId = bsm->getSenderPseudonym();
 
@@ -69,36 +69,21 @@ bool AggrigationApp::CheckNodeForReport(unsigned long myPseudonym,
     for (int var = 0; var < bsmCheckListSize; ++var) {
         factorList[var] = bsmCheckList[var].getRangePlausibility();
     }
-
     tempFactor = AggregateFactorsListDouble(bsmCheck->getRangePlausibility(),
             factorList, bsmCheckListSize);
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
+
     if (tempFactor < Threshold) {
         checkFailed = true;
-
-        prntApp->incFlags(mdChecksTypes::RangePlausibility,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::RangePlausibility,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
     }
-
     //std::cout<< "PositionConsistancy" << '\n';
     for (int var = 0; var < bsmCheckListSize; ++var) {
         factorList[var] = bsmCheckList[var].getPositionConsistancy();
     }
     tempFactor = AggregateFactorsListDouble(bsmCheck->getPositionConsistancy(),
             factorList, bsmCheckListSize);
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
+
     if (tempFactor < Threshold) {
         checkFailed = true;
-        prntApp->incFlags(mdChecksTypes::PositionConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::PositionConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
     }
 
     //std::cout<< "PositionSpeedConsistancy" << '\n';
@@ -108,15 +93,9 @@ bool AggrigationApp::CheckNodeForReport(unsigned long myPseudonym,
     tempFactor = AggregateFactorsListDouble(
             bsmCheck->getPositionSpeedConsistancy(), factorList,
             bsmCheckListSize);
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
+
     if (tempFactor < Threshold) {
         checkFailed = true;
-        prntApp->incFlags(mdChecksTypes::PositionSpeedConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::PositionSpeedConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
     }
 
     //std::cout<< "PositionSpeedMaxConsistancy" << '\n';
@@ -126,15 +105,8 @@ bool AggrigationApp::CheckNodeForReport(unsigned long myPseudonym,
     tempFactor = AggregateFactorsListDouble(
             bsmCheck->getPositionSpeedMaxConsistancy(), factorList,
             bsmCheckListSize);
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
     if (tempFactor < Threshold) {
         checkFailed = true;
-        prntApp->incFlags(mdChecksTypes::PositionSpeedMaxConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::PositionSpeedMaxConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
     }
 
     //std::cout<< "SpeedConsistancy" << '\n';
@@ -143,15 +115,8 @@ bool AggrigationApp::CheckNodeForReport(unsigned long myPseudonym,
     }
     tempFactor = AggregateFactorsListDouble(bsmCheck->getSpeedConsistancy(),
             factorList, bsmCheckListSize);
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
     if (tempFactor < Threshold) {
         checkFailed = true;
-        prntApp->incFlags(mdChecksTypes::SpeedConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::SpeedConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
     }
 
     //std::cout<< "SpeedPlausibility" << '\n';
@@ -160,15 +125,8 @@ bool AggrigationApp::CheckNodeForReport(unsigned long myPseudonym,
     }
     tempFactor = AggregateFactorsListDouble(bsmCheck->getSpeedPlausibility(),
             factorList, bsmCheckListSize);
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
     if (tempFactor < Threshold) {
         checkFailed = true;
-        prntApp->incFlags(mdChecksTypes::SpeedPlausibility,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::SpeedPlausibility,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
     }
 
     //std::cout<< "PositionPlausibility" << '\n';
@@ -177,15 +135,8 @@ bool AggrigationApp::CheckNodeForReport(unsigned long myPseudonym,
     }
     tempFactor = AggregateFactorsListDouble(bsmCheck->getPositionPlausibility(),
             factorList, bsmCheckListSize);
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
     if (tempFactor < Threshold) {
         checkFailed = true;
-        prntApp->incFlags(mdChecksTypes::PositionPlausibility,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::PositionPlausibility,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
     }
 
     //std::cout<< "BeaconFrequency" << '\n';
@@ -194,32 +145,10 @@ bool AggrigationApp::CheckNodeForReport(unsigned long myPseudonym,
     }
     tempFactor = AggregateFactorsListDouble(bsmCheck->getBeaconFrequency(),
             factorList, bsmCheckListSize);
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
     if (tempFactor < Threshold) {
         checkFailed = true;
-        prntApp->incFlags(mdChecksTypes::BeaconFrequency,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::BeaconFrequency,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
     }
 
-    //std::cout<< "SuddenAppearence" << '\n';
-    for (int var = 0; var < bsmCheckListSize; ++var) {
-        factorList[var] = bsmCheckList[var].getSuddenAppearence();
-    }
-    tempFactor = AggregateFactorsListDouble(bsmCheck->getSuddenAppearence(),
-            factorList, bsmCheckListSize);
-    if (tempFactor < minFactor) {
-        //     temp = minFactor;
-    }
-    if (tempFactor < Threshold) {
-        prntApp->incFlags(mdChecksTypes::SuddenAppearence,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::SuddenAppearence,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-    }
 
     //std::cout<< "PositionHeadingConsistancy" << '\n';
     for (int var = 0; var < bsmCheckListSize; ++var) {
@@ -228,15 +157,8 @@ bool AggrigationApp::CheckNodeForReport(unsigned long myPseudonym,
     tempFactor = AggregateFactorsListDouble(
             bsmCheck->getPositionHeadingConsistancy(), factorList,
             bsmCheckListSize);
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
     if (tempFactor < Threshold) {
         checkFailed = true;
-        prntApp->incFlags(mdChecksTypes::PositionHeadingConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::PositionHeadingConsistancy,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
     }
 
     //std::cout<< "kalmanPSCP" << '\n';
@@ -245,15 +167,8 @@ bool AggrigationApp::CheckNodeForReport(unsigned long myPseudonym,
     }
     tempFactor = AggregateFactorsListDouble(bsmCheck->getKalmanPSCP(),
             factorList, bsmCheckListSize);
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
     if (tempFactor < Threshold) {
         checkFailed = true;
-        prntApp->incFlags(mdChecksTypes::kalmanPSCP,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::kalmanPSCP,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
     }
 
     //std::cout<< "kalmanPSCS" << '\n';
@@ -262,15 +177,8 @@ bool AggrigationApp::CheckNodeForReport(unsigned long myPseudonym,
     }
     tempFactor = AggregateFactorsListDouble(bsmCheck->getKalmanPSCS(),
             factorList, bsmCheckListSize);
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
     if (tempFactor < Threshold) {
         checkFailed = true;
-        prntApp->incFlags(mdChecksTypes::kalmanPSCS,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::kalmanPSCS,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
     }
 
     //std::cout<< "kalmanPSCSP" << '\n';
@@ -279,15 +187,8 @@ bool AggrigationApp::CheckNodeForReport(unsigned long myPseudonym,
     }
     tempFactor = AggregateFactorsListDouble(bsmCheck->getKalmanPSCSP(),
             factorList, bsmCheckListSize);
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
     if (tempFactor < Threshold) {
         checkFailed = true;
-        prntApp->incFlags(mdChecksTypes::kalmanPSCSP,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::kalmanPSCSP,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
     }
 
     //std::cout<< "kalmanPSCSS" << '\n';
@@ -296,15 +197,8 @@ bool AggrigationApp::CheckNodeForReport(unsigned long myPseudonym,
     }
     tempFactor = AggregateFactorsListDouble(bsmCheck->getKalmanPSCSS(),
             factorList, bsmCheckListSize);
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
     if (tempFactor < Threshold) {
         checkFailed = true;
-        prntApp->incFlags(mdChecksTypes::kalmanPSCSS,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::kalmanPSCSS,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
     }
 
     //std::cout<< "kalmanPCS" << '\n';
@@ -313,15 +207,9 @@ bool AggrigationApp::CheckNodeForReport(unsigned long myPseudonym,
     }
     tempFactor = AggregateFactorsListDouble(bsmCheck->getKalmanPCC(),
             factorList, bsmCheckListSize);
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
+
     if (tempFactor < Threshold) {
         checkFailed = true;
-        prntApp->incFlags(mdChecksTypes::kalmanPCC,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::kalmanPCC,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
     }
 
     //std::cout<< "kalmanPACS" << '\n';
@@ -330,15 +218,9 @@ bool AggrigationApp::CheckNodeForReport(unsigned long myPseudonym,
     }
     tempFactor = AggregateFactorsListDouble(bsmCheck->getKalmanPACS(),
             factorList, bsmCheckListSize);
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
+
     if (tempFactor < Threshold) {
         checkFailed = true;
-        prntApp->incFlags(mdChecksTypes::kalmanPACS,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::kalmanPACS,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
     }
 
     //std::cout<< "kalmanSCC" << '\n';
@@ -347,15 +229,8 @@ bool AggrigationApp::CheckNodeForReport(unsigned long myPseudonym,
     }
     tempFactor = AggregateFactorsListDouble(bsmCheck->getKalmanSCC(),
             factorList, bsmCheckListSize);
-    if (tempFactor < minFactor) {
-        minFactor = tempFactor;
-    }
     if (tempFactor < Threshold) {
         checkFailed = true;
-        prntApp->incFlags(mdChecksTypes::kalmanSCC,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
-        prntAppInst->incFlags(mdChecksTypes::kalmanSCC,
-                mbTypes::intMbs[bsm->getSenderMbType()]);
     }
 
     InterTest inter = bsmCheck->getIntersection();
@@ -375,15 +250,8 @@ bool AggrigationApp::CheckNodeForReport(unsigned long myPseudonym,
         //std::cout<< "Intersection" << '\n';
         tempFactor = AggregateFactorsListDouble(curInferFactor, factorList,
                 bsmCheckListSize);
-        if (tempFactor < minFactor) {
-            minFactor = tempFactor;
-        }
         if (tempFactor < Threshold) {
             checkFailed = true;
-            prntApp->incFlags(mdChecksTypes::Intersection,
-                    mbTypes::intMbs[bsm->getSenderMbType()]);
-            prntAppInst->incFlags(mdChecksTypes::Intersection,
-                    mbTypes::intMbs[bsm->getSenderMbType()]);
         }
     }
 
@@ -436,6 +304,32 @@ double AggrigationApp::AggregateFactorsListDouble(double curFactor, double *fact
         }
     }
 }
+
+//
+//double AggrigationApp::AggregateFactorsListDouble(double curFactor, double *factorList,
+//        int factorListSize) {
+//
+//    if (version == 1) {
+//        double averageFactor = curFactor;
+//        for (int var = 0; var < factorListSize; ++var) {
+//            averageFactor = averageFactor + factorList[var];
+//        }
+//        averageFactor = averageFactor / (factorListSize + 1);
+//
+//        return averageFactor;
+//    } else {
+//        if (curFactor <= 0) {
+//            return 0;
+//        } else {
+//            double averageFactor = curFactor;
+//            for (int var = 0; var < factorListSize; ++var) {
+//                averageFactor = averageFactor + factorList[var];
+//            }
+//            averageFactor = averageFactor / (factorListSize + 1);
+//            return averageFactor;
+//        }
+//    }
+//}
 
 //best rate / faulty
 //bool AggrigationApp::AggregateFactorsList(double curFactor, double *factorList,

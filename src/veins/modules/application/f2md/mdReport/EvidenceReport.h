@@ -23,7 +23,7 @@
 
 using namespace omnetpp;
 
-#define MAX_EVI_BSM 25
+#define MAX_EVI_BSM 30
 
 class EvidenceReport: public MDReport {
 

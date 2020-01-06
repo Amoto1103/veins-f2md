@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- generated on 2019-10-23 13:13:56.896037 by $Id$
+  options: <doubleminus>net-file UlmScenario.net.xml <doubleminus>route-file UlmScenario.119.rou.xml <doubleminus>fringe-factor 800 <doubleminus>begin 82800 -l <doubleminus>end 86400 -l <doubleminus>period 70 -l <doubleminus>prefix x5a <doubleminus>trip-attributes=type= "passenger5a"  <doubleminus>additional-files type.add.xml <doubleminus>edge-permission passenger
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <trip id="x5a0" depart="82800.00" from="4432382#0" to="4441817#2" type= "passenger5a"/>
+    <trip id="x5a1" depart="82870.00" from="60418608#0" to="218482063" type= "passenger5a"/>
+    <trip id="x5a2" depart="82940.00" from="4609567#0" to="310214404" type= "passenger5a"/>
+    <trip id="x5a3" depart="83010.00" from="227562699#0" to="4624428" type= "passenger5a"/>
+    <trip id="x5a4" depart="83080.00" from="241958095" to="32460642" type= "passenger5a"/>
+    <trip id="x5a5" depart="83150.00" from="-106565099" to="222222910" type= "passenger5a"/>
+    <trip id="x5a6" depart="83220.00" from="-70881805#3" to="-221388732" type= "passenger5a"/>
+    <trip id="x5a7" depart="83290.00" from="-399370052" to="4441817#2" type= "passenger5a"/>
+    <trip id="x5a8" depart="83360.00" from="-60418432#1" to="-53856394#0" type= "passenger5a"/>
+    <trip id="x5a9" depart="83430.00" from="-106565099" to="686962510" type= "passenger5a"/>
+    <trip id="x5a10" depart="83500.00" from="-55914803" to="653656168#0" type= "passenger5a"/>
+    <trip id="x5a11" depart="83570.00" from="221388736#0" to="399370052" type= "passenger5a"/>
+    <trip id="x5a12" depart="83640.00" from="-186702383" to="4441817#2" type= "passenger5a"/>
+    <trip id="x5a13" depart="83710.00" from="-24646002#3" to="-67324778#0" type= "passenger5a"/>
+    <trip id="x5a14" depart="83780.00" from="-4446583#4" to="454027478" type= "passenger5a"/>
+    <trip id="x5a15" depart="83850.00" from="60251895" to="-61328647#0" type= "passenger5a"/>
+    <trip id="x5a16" depart="83920.00" from="4609572#0" to="-84018136#0" type= "passenger5a"/>
+    <trip id="x5a17" depart="83990.00" from="47356744" to="4432392#1" type= "passenger5a"/>
+    <trip id="x5a18" depart="84060.00" from="-399370052" to="32460642" type= "passenger5a"/>
+    <trip id="x5a19" depart="84130.00" from="-55913203#1" to="4624426" type= "passenger5a"/>
+    <trip id="x5a20" depart="84200.00" from="-399370052" to="4396732" type= "passenger5a"/>
+    <trip id="x5a21" depart="84270.00" from="-4624426" to="-221388736#0" type= "passenger5a"/>
+    <trip id="x5a22" depart="84340.00" from="-24645209" to="59475140#0" type= "passenger5a"/>
+    <trip id="x5a23" depart="84410.00" from="53856394#0" to="4441829" type= "passenger5a"/>
+    <trip id="x5a24" depart="84480.00" from="24993817" to="463414886" type= "passenger5a"/>
+    <trip id="x5a25" depart="84550.00" from="-219716855" to="32460642" type= "passenger5a"/>
+    <trip id="x5a26" depart="84620.00" from="4609572#0" to="32460642" type= "passenger5a"/>
+    <trip id="x5a27" depart="84690.00" from="47356744" to="4441817#2" type= "passenger5a"/>
+    <trip id="x5a28" depart="84760.00" from="4405119#0" to="-84018136#0" type= "passenger5a"/>
+    <trip id="x5a29" depart="84830.00" from="-222222910" to="4624426" type= "passenger5a"/>
+    <trip id="x5a30" depart="84900.00" from="4609572#0" to="-4609567#0" type= "passenger5a"/>
+    <trip id="x5a31" depart="84970.00" from="4432382#0" to="60112579#5" type= "passenger5a"/>
+    <trip id="x5a32" depart="85040.00" from="-24645209" to="329163391#3" type= "passenger5a"/>
+    <trip id="x5a33" depart="85110.00" from="4432382#0" to="463982792" type= "passenger5a"/>
+    <trip id="x5a34" depart="85180.00" from="47356744" to="-204335597#0" type= "passenger5a"/>
+    <trip id="x5a35" depart="85250.00" from="84018136#0" to="596568012#1" type= "passenger5a"/>
+    <trip id="x5a36" depart="85320.00" from="-597992541#6" to="596568012#1" type= "passenger5a"/>
+    <trip id="x5a37" depart="85390.00" from="60251895" to="32460642" type= "passenger5a"/>
+    <trip id="x5a38" depart="85460.00" from="-4624431" to="32460642" type= "passenger5a"/>
+    <trip id="x5a39" depart="85530.00" from="-596568012#1" to="4624428" type= "passenger5a"/>
+    <trip id="x5a40" depart="85600.00" from="-4611394#10" to="-317794120" type= "passenger5a"/>
+    <trip id="x5a41" depart="85670.00" from="-584518943#2" to="4441829" type= "passenger5a"/>
+    <trip id="x5a42" depart="85740.00" from="60251895" to="-317794120" type= "passenger5a"/>
+    <trip id="x5a43" depart="85810.00" from="67324778#0" to="32460642" type= "passenger5a"/>
+    <trip id="x5a44" depart="85880.00" from="-399370052" to="222222910" type= "passenger5a"/>
+    <trip id="x5a45" depart="85950.00" from="200843277#0" to="24645209" type= "passenger5a"/>
+    <trip id="x5a46" depart="86020.00" from="-115927240#1" to="-53856394#0" type= "passenger5a"/>
+    <trip id="x5a47" depart="86090.00" from="-444098644" to="24645209" type= "passenger5a"/>
+    <trip id="x5a48" depart="86160.00" from="-60298884#1" to="4611394#10" type= "passenger5a"/>
+    <trip id="x5a49" depart="86230.00" from="-444098644" to="4624421#8" type= "passenger5a"/>
+    <trip id="x5a50" depart="86300.00" from="-204335563#2" to="4441817#2" type= "passenger5a"/>
+    <trip id="x5a51" depart="86370.00" from="4609567#0" to="-221388733#0" type= "passenger5a"/>
+</routes>

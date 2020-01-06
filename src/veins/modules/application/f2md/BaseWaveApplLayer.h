@@ -41,7 +41,6 @@
 #include <veins/modules/application/f2md/mdSupport/MDMLib.h>
 #include <veins/modules/application/f2md/mdSupport/RelativeOffset.h>
 #include <veins/modules/application/f2md/mdSupport/RelativeOffsetConf.h>
-#define MYBSM_SIZE 20
 
 namespace veins {
 
@@ -190,48 +189,6 @@ protected:
     /* messages for periodic events such as beacon and WSA transmissions */
     cMessage* sendBeaconEvt;
     cMessage* sendWSAEvt;
-
-    /* F2MD */
-
-    Coord curPositionConfidenceOrig;
-    Coord curSpeedConfidenceOrig;
-    Coord curHeadingConfidenceOrig;
-    Coord curAccelConfidenceOrig;
-
-    Coord curPositionConfidence;
-    Coord curSpeedConfidence;
-    Coord curHeading;
-    Coord curHeadingConfidence;
-    Coord curAccel;
-    Coord curAccelConfidence;
-    double myWidth;
-    double myLength;
-    mbTypes::Mbs myMdType;
-    attackTypes::Attacks myAttackType;
-    reportTypes::Report myReportType;
-    unsigned long myPseudonym;
-    int pseudoNum;
-    BasicSafetyMessage attackBsm = BasicSafetyMessage();
-    BasicSafetyMessage nextAttackBsm = BasicSafetyMessage();
-    BasicSafetyMessage myBsm[MYBSM_SIZE];
-    void addMyBsm(BasicSafetyMessage bsm);
-    int myBsmNum = 0;
-
-    Coord ConfPosMax;
-    Coord ConfSpeedMax;
-    Coord ConfHeadMax;
-    Coord ConfAccelMax;
-
-    double deltaConfPos = 0;
-    double deltaConfSpeed = 0;
-    double deltaConfHead = 0;
-    double deltaConfAccel = 0;
-
-    double deltaRPosition = 0;
-    double deltaThetaPosition = 0;
-    double deltaSpeed = 0;
-    double deltaHeading = 0;
-    double deltaAccel = 0;
 };
 
 } // namespace Veins

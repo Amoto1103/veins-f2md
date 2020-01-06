@@ -21,6 +21,14 @@ int MDMHistory::getMDMNumV1() {
     return BSMNumV1;
 }
 
+int MDMHistory::getMDMNum(int version) {
+    if (version == 1) {
+        return BSMNumV1;
+    } else {
+        return BSMNumV2;
+    }
+}
+
 int MDMHistory::getMDMNumV2() {
     return BSMNumV2;
 }
@@ -36,6 +44,14 @@ BsmCheck MDMHistory::getBsmCheck(int index, int version) {
         return bsmCheckListV1[index];
     } else {
         return bsmCheckListV2[index];
+    }
+}
+
+BsmCheck* MDMHistory::getLatestBsmCheckAddr(int version) {
+    if (version == 1) {
+        return &bsmCheckListV1[0];
+    } else {
+        return &bsmCheckListV2[0];
     }
 }
 

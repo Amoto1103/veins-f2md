@@ -32,8 +32,14 @@ protected:
 
 public:
     ProtocolEnforcer();
+
+    bool isReported(unsigned long pseudo);
+
     bool addMisbehavingPseudo(unsigned long pseudo, double curTime);
     int getReportPseudoes(double curTime, unsigned long * pseudosList);
+    int getAllReportPseudoes(double curTime, unsigned long * pseudosList);
+
+    void removeReportedPseudo(unsigned long pseudo);
 
 };
 

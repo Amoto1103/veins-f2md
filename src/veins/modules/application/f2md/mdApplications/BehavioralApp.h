@@ -18,20 +18,19 @@
 #include "../mdEnumTypes/MdChecksTypes.h"
 #include "../mdEnumTypes/MbTypes.h"
 
+#include "../F2MDParameters.h"
+
 using namespace veins;
 using namespace omnetpp;
-
-#define MAX_DETECTED_NODES 5000
 
 class BehavioralApp: public MDApplication {
 public:
 
     double Threshold = 0.5;
-    double minFactor = 1;
+
 
     unsigned long PseudonymsToTMO[MAX_DETECTED_NODES];
-    unsigned long TimeOut[MAX_DETECTED_NODES];
-    unsigned long TimeOutEffected[MAX_DETECTED_NODES];
+    double TimeOut[MAX_DETECTED_NODES];
     double UpdatedTMO[MAX_DETECTED_NODES];
     int TimeOutNum = 0;
 

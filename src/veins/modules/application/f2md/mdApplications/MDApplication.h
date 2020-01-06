@@ -44,6 +44,9 @@ protected:
 
     int version;
 
+    double minFactor = 1;
+
+
     char const *AppV1Name = "AppV1";
     char const *AppV2Name = "AppV2";
 
@@ -57,7 +60,10 @@ public:
             BasicSafetyMessage * bsm, BsmCheck * bsmCheck,
             NodeTable * detectedNodes)= 0;
 
-    virtual double getMinFactor()= 0;
+
+    void calculateMinFactor(BsmCheck * bsmCheck);
+    double getMinFactor();
+    void incrementDetailedFlags(BasicSafetyMessage * bsm,BsmCheck * bsmCheck, double Threshold);
 
     void saveLine( std::string path, std::string serial, double density,
             double deltaT, bool printOut);

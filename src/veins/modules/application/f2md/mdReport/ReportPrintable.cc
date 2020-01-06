@@ -121,8 +121,21 @@ std::string ReportPrintable::getBsmXml(BasicSafetyMessage bsm){
     tempStr = tempStr + std::to_string(bsm.getSenderPseudonym());
     tempStr = tempStr + "\"";
 
+    tempStr = tempStr + "ct=\"";
+    tempStr = tempStr + bsm.getCreationTime().str();
+    tempStr = tempStr + "\"";
+
     tempStr = tempStr + "ts=\"";
     tempStr = tempStr + bsm.getArrivalTime().str();
+    tempStr = tempStr + "\"";
+
+    tempStr = tempStr + "mbt=\"";
+    tempStr = tempStr + mbTypes::mbNames[bsm.getSenderMbType()];
+    tempStr = tempStr + "\"";
+
+
+    tempStr = tempStr + "att=\"";
+    tempStr = tempStr + attackTypes::AttackNames[bsm.getSenderAttackType()];
     tempStr = tempStr + "\"";
 
     xml.writeOpenTagWithAttribute("Bsm", tempStr);
@@ -285,7 +298,6 @@ std::string ReportPrintable::getCheckJson(BsmCheck Check){
     tempStr = jw.getSimpleTag("kSCC", std::to_string(Check.getKalmanSCC()),true);
     jw.addTagToElement("BsmCheck", tempStr);
 
-
      jw.openJsonElementList("inT");
 
      JsonWriter jw2;
@@ -422,7 +434,16 @@ std::string ReportPrintable::getBsmJson(BasicSafetyMessage bsm){
     tempStr = jw.getSimpleTag("RealId", std::to_string(bsm.getSenderRealId()) ,true);
     jw.addTagToElement("Bsm", tempStr);
 
+    tempStr = jw.getSimpleTag("CreationTime", bsm.getCreationTime().str(),true);
+    jw.addTagToElement("Bsm", tempStr);
+
     tempStr = jw.getSimpleTag("ArrivalTime", bsm.getArrivalTime().str(),true);
+    jw.addTagToElement("Bsm", tempStr);
+
+    tempStr = jw.getSimpleTag("MbType", mbTypes::mbNames[bsm.getSenderMbType()],false);
+    jw.addTagToElement("Bsm", tempStr);
+
+    tempStr = jw.getSimpleTag("AttackType", attackTypes::AttackNames[bsm.getSenderAttackType()],false);
     jw.addTagToElement("Bsm", tempStr);
 
     jw.openJsonElementList("GpsCoord");

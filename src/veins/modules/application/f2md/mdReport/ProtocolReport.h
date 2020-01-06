@@ -23,7 +23,7 @@
 
 using namespace omnetpp;
 
-#define MAX_EVI_BSM 25
+#define MAX_EVI_BSM_PROTO 30
 
 class ProtocolReport: public MDReport {
 
@@ -32,13 +32,13 @@ private:
     void addBsmToList(BasicSafetyMessage bsm, BsmCheck check);
 
     BsmCheck reportedCheck;
-    BasicSafetyMessage bsmList[MAX_EVI_BSM];
-    BsmCheck checksList[MAX_EVI_BSM];
+    BasicSafetyMessage bsmList[MAX_EVI_BSM_PROTO];
+    BsmCheck checksList[MAX_EVI_BSM_PROTO];
     int bsmListNum;
 
 public:
     ProtocolReport(MDReport baseReport);
-    void addEvidence(BasicSafetyMessage myBsm,bool initial, BsmCheck reportedCheck, BasicSafetyMessage receivedBsm,
+    void addEvidence(BasicSafetyMessage myBsm, BsmCheck reportedCheck, BasicSafetyMessage receivedBsm,
             NodeTable * detectedNodes, double curTime, double deltaTime, int version);
     std::string getReportPrintableJson();
 };

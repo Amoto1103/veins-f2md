@@ -15,6 +15,14 @@ ProtocolEnforcer::ProtocolEnforcer() {
     reportedPseudosNum = 0;
 }
 
+bool ProtocolEnforcer::isReported(unsigned long pseudo){
+    for (int var = 0; var < reportedPseudosNum; ++var) {
+        if(reportedPseudos[var] == pseudo){
+            return true;
+        }
+    }
+    return false;
+}
 
 bool ProtocolEnforcer::addMisbehavingPseudo(unsigned long pseudo, double curTime){
     int pseudoIndex = -1;
@@ -57,6 +65,16 @@ int ProtocolEnforcer::getReportPseudoes(double curTime, unsigned long * pseudosL
     return reportCount;
 }
 
+int ProtocolEnforcer::getAllReportPseudoes(double curTime, unsigned long * pseudosList){
+    int reportCount = 0;
+    for (int var = 0; var < reportedPseudosNum; ++var) {
+        pseudosList[reportCount] = reportedPseudos[var];
+        reportCount ++;
+        reportTime[var] = curTime;
+    }
+    return reportCount;
+}
+
 void ProtocolEnforcer::removeMisbehavingPseudo(int index){
     for (int var = index; var < reportedPseudosNum -1 ; ++var) {
         reportedPseudos[var] = reportedPseudos[var + 1];
@@ -66,3 +84,16 @@ void ProtocolEnforcer::removeMisbehavingPseudo(int index){
     reportedPseudosNum -- ;
 }
 
+
+void ProtocolEnforcer::removeReportedPseudo(unsigned long pseudo){
+    int index = -1;
+    for (int var = 0; var < reportedPseudosNum; ++var) {
+        if(reportedPseudos[var] == pseudo){
+            index = var;
+            break;
+        }
+    }
+    if(index !=-1){
+        removeMisbehavingPseudo(index);
+    }
+}

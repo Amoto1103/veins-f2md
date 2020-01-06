@@ -17,6 +17,7 @@
 #include <veins/modules/application/f2md/mdMessages/BasicSafetyMessage_m.h>
 #include <veins/modules/application/f2md/mdSupport/GeneralLib.h>
 #include <veins/modules/application/f2md/mdSupport/MDMLib.h>
+#include <veins/modules/application/f2md/mdReport/ProtocolEnforcer.h>
 
 class NodeTable {
 
@@ -26,17 +27,17 @@ private:
     MDMHistory mdmHistoryList[MAX_NODES_LENGTH];
     unsigned long nodePseudos[MAX_NODES_LENGTH];
 
-    NodeHistory nullNode;
-    MDMHistory nullMDMNode;
+    NodeHistory nullNode = NodeHistory();
+    MDMHistory nullMDMNode = MDMHistory();
 
-    int getOldestNode();
+    int getOldestNode(ProtocolEnforcer*, ProtocolEnforcer*);
 
 public:
     NodeTable();
     int getNodesNum();
     NodeHistory* getNodeHistoryList();
     unsigned long getNodePseudo(int);
-    void put(unsigned long, NodeHistory, MDMHistory);
+    void put(unsigned long, NodeHistory, MDMHistory, ProtocolEnforcer*, ProtocolEnforcer*);
     NodeHistory* getNodeHistoryAddr(unsigned long nodePseudonym);
     MDMHistory* getMDMHistoryAddr(unsigned long nodePseudonym);
 

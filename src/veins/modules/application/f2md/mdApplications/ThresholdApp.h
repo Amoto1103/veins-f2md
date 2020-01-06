@@ -25,8 +25,6 @@ class ThresholdApp: public MDApplication {
 public:
 
     double Threshold = 0;
-    double minFactor = 1;
-
 
     ThresholdApp(int version,double Threshold);
 

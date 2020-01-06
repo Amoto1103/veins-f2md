@@ -9,8 +9,8 @@
  * All rights reserved.
  *******************************************************************************/
 
-#ifndef __VEINS_MDModule_H_
-#define __VEINS_MDModule_H_
+#ifndef __VEINS_LegacyChecks_H_
+#define __VEINS_LegacyChecks_H_
 
 #include <tuple>
 

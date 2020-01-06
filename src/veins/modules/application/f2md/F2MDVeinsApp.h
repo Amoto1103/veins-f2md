@@ -16,6 +16,7 @@
 #include <omnetpp.h>
 #include <veins/modules/application/f2md/BaseWaveApplLayer.h>
 #include <veins/modules/application/f2md/mdChecks/CaTChChecks.h>
+#include <veins/modules/application/f2md/mdChecks/ExperiChecks.h>
 #include <veins/modules/application/f2md/mdChecks/LegacyChecks.h>
 
 using namespace omnetpp;
@@ -30,6 +31,7 @@ using namespace veins;
 #include <veins/modules/application/f2md/mdApplications/ThresholdApp.h>
 #include <veins/modules/application/f2md/mdApplications/AggregationApp.h>
 #include <veins/modules/application/f2md/mdApplications/BehavioralApp.h>
+#include <veins/modules/application/f2md/mdApplications/CooperativeApp.h>
 #include <veins/modules/application/f2md/mdApplications/PyBridgeApp.h>
 #include <veins/modules/application/f2md/mdApplications/ExperiApp.h>
 
@@ -43,19 +45,22 @@ using namespace veins;
 #include <veins/modules/application/f2md/mdReport/ProtocolEnforcer.h>
 
 #include <ctime>
+#include <chrono>
+using namespace std::chrono;
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <linux/limits.h>
 
 #include <veins/modules/application/f2md/mdSupport/BsmPrintable.h>
+#include <veins/modules/application/f2md/mdSupport/VeReMiPrintable.h>
+#include <veins/modules/application/f2md/mdSupport/LocalAttackServer.h>
 
 #include <veins/modules/application/f2md/mdPCPolicies/PCPolicy.h>
 #include <veins/modules/application/f2md/mdAttacks/MDAttack.h>
 #include <veins/modules/application/f2md/mdAttacks/MDGlobalAttack.h>
 
 #include <veins/modules/application/f2md/mdSupport/HTTPRequest.h>
-
 
 #define mlHostV1 "localhost"
 #define mlHostV2 "localhost"
@@ -79,7 +84,6 @@ BsmCheck bsmCheckV1, bsmCheckV2;
 
 static double meanTimeV1, meanTimeV2 = 0;
 static unsigned long numTimeV1, numTimeV2 = 0;
-clock_t beginV1, endV1, beginV2, endV2;
 
 static double deltaTV1, deltaTV2, deltaTVS1, deltaTVS2 = 0;
 static bool initV1, initV2 = false;
@@ -87,6 +91,14 @@ static bool initV1, initV2 = false;
 static MDStatistics mdStats = MDStatistics();
 static VarThrePrintable varThrePrintableV1 = VarThrePrintable("AppV1");
 static VarThrePrintable varThrePrintableV2 = VarThrePrintable("AppV2");
+
+static CooperativeApp CoopV1 = CooperativeApp(1, 0.5);
+static CooperativeApp CoopV2 = CooperativeApp(2, 0.5);
+
+static std::string attackHost = "localhost";
+//static std::string attackHost = "192.168.60.144";
+static int attackPort = 9975;
+static LocalAttackServer localAttackServer = LocalAttackServer(attackPort, attackHost);
 
 class JosephVeinsApp: public BaseWaveApplLayer {
 private:
@@ -108,6 +120,8 @@ protected:
 
     virtual void handleSelfMsg(cMessage* msg);
     virtual void handlePositionUpdate(cObject* obj);
+
+    virtual void populateWSM(BaseFrame1609_4* wsm, LAddress::L2Type rcvId = LAddress::L2BROADCAST(), int serial = 0);
 
     mbTypes::Mbs induceMisbehavior(double localAttacker, double globalAttacker);
     void LocalMisbehaviorDetection(BasicSafetyMessage* bsm, int version);
@@ -137,15 +151,17 @@ protected:
     pseudoChangeTypes::PseudoChange myPcType;
     PCPolicy pcPolicy;
 
+
+
     typedef std::list<Obstacle*> ObstacleGridCell;
     typedef std::vector<ObstacleGridCell> ObstacleGridRow;
     typedef std::vector<ObstacleGridRow> Obstacles;
 
-    ThresholdApp ThreV1 = ThresholdApp(1, 0.5);
-    ThresholdApp ThreV2 = ThresholdApp(2, 0.5);
+    ThresholdApp ThreV1 = ThresholdApp(1, 0.28125);
+    ThresholdApp ThreV2 = ThresholdApp(2, 0.28125);
 
-    AggrigationApp AggrV1 = AggrigationApp(1, 0.5, 10.0, 3);
-    AggrigationApp AggrV2 = AggrigationApp(2, 0.5, 10.0, 3);
+    AggrigationApp AggrV1 = AggrigationApp(1, 0.28125,0.5, 10.0, 3);
+    AggrigationApp AggrV2 = AggrigationApp(2, 0.28125,0.5, 10.0, 3);
 
     BehavioralApp BehaV1 = BehavioralApp(1, 0.5);
     BehavioralApp BehaV2 = BehavioralApp(2, 0.5);
@@ -166,7 +182,57 @@ protected:
     double MaxRandomPosX = 3900.0;
     double MaxRandomPosY = 1700.0;
 
-    void handleReportProtocol();
+    void handleReportProtocol(bool lastTimeStep);
+
+
+    VeReMiPrintable VeReMi = VeReMiPrintable();
+
+
+    /* F2MD */
+    double lastPositionUpdate;
+    Coord curPositionConfidenceOrig;
+    Coord curSpeedConfidenceOrig;
+    Coord curHeadingConfidenceOrig;
+    Coord curAccelConfidenceOrig;
+
+    Coord curPositionConfidence;
+    Coord curSpeedConfidence;
+    Coord curHeading;
+    Coord curHeadingConfidence;
+    Coord curAccel;
+    Coord curAccelConfidence;
+    double myWidth;
+    double myLength;
+
+    std::string myVType;
+
+    mbTypes::Mbs myMdType;
+    attackTypes::Attacks myAttackType;
+    reportTypes::Report myReportType;
+    unsigned long myPseudonym;
+    int pseudoNum;
+    BasicSafetyMessage attackBsm = BasicSafetyMessage();
+    BasicSafetyMessage nextAttackBsm = BasicSafetyMessage();
+    BasicSafetyMessage myBsm[MYBSM_SIZE];
+    void addMyBsm(BasicSafetyMessage bsm);
+    int myBsmNum = 0;
+
+    Coord ConfPosMax;
+    Coord ConfSpeedMax;
+    Coord ConfHeadMax;
+    Coord ConfAccelMax;
+
+    double deltaConfPos = 0;
+    double deltaConfSpeed = 0;
+    double deltaConfHead = 0;
+    double deltaConfAccel = 0;
+
+    double deltaRPosition = 0;
+    double deltaThetaPosition = 0;
+    double deltaSpeed = 0;
+    double deltaHeading = 0;
+    double deltaAccel = 0;
+    /* F2MD */
 
 public:
 

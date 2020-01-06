@@ -20,6 +20,7 @@ enum App {
     ThresholdApp = 0,
     AggrigationApp,
     BehavioralApp,
+    CooperativeApp,
     ExperiApp,
     PyBridgeApp,
 
@@ -27,7 +28,7 @@ enum App {
 };
 
 static const char* AppNames[] = { "ThresholdApp",
-        "AggrigationApp", "BehavioralApp", "ExperiApp",
+        "AggrigationApp","CooperativeApp", "BehavioralApp", "ExperiApp",
         "PyBridgeApp" };
 
 static_assert(sizeof(mdAppTypes::AppNames)/sizeof(char*) == mdAppTypes::SIZE_OF_ENUM

@@ -28,9 +28,8 @@ public:
     double devValue = 0.5;
     double deltaTrustTime = 10;
     int maxBsmTrustNum = 5;
-    double minFactor = 1;
 
-    AggrigationApp(int version, double devValue ,double deltaTrustTime,
+    AggrigationApp(int version, double Threshold, double devValue ,double deltaTrustTime,
             int maxBsmTrustNum);
 
     bool CheckNodeForReport(unsigned long myPseudonym,

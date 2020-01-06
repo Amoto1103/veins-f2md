@@ -75,13 +75,13 @@ std::string BsmPrintable::getBsmPrintableJson() {
     return jw.getOutString();
 }
 
-std::string BsmPrintable::getSelfBsmPrintableJson() {
+std::string BsmPrintable::getSelfBsmPrintableJson(std::string myVType) {
     ReportPrintable rp;
 
     JsonWriter jw;
     jw.writeHeader();
     jw.openJsonElement("BsmPrint", false);
-    jw.addTagToElement("BsmPrint", getSelfBsmPrintHead());
+    jw.addTagToElement("BsmPrint", getSelfBsmPrintHead(myVType));
     jw.openJsonElementList("BSMs");
     jw.addFinalTagToElement("BSMs",rp.getBsmJson(bsm));
     jw.addFinalTagToElement("BsmPrint",jw.getJsonElementList("BSMs"));
@@ -91,7 +91,7 @@ std::string BsmPrintable::getSelfBsmPrintableJson() {
     return jw.getOutString();
 }
 
-std::string BsmPrintable::getSelfBsmPrintHead() {
+std::string BsmPrintable::getSelfBsmPrintHead(std::string myVType) {
 
     std::string tempStr = "";
     JsonWriter jw;
@@ -108,6 +108,9 @@ std::string BsmPrintable::getSelfBsmPrintHead() {
 
     tempStr = jw.getSimpleTag("generationTime", std::to_string(simTime().dbl()),
             true);
+    jw.addTagToElement("Metadata", tempStr);
+
+    tempStr = jw.getSimpleTag("myVType", myVType ,false);
     jw.addTagToElement("Metadata", tempStr);
 
     tempStr = jw.getSimpleTag("mbType", mbTypes::mbNames[bsm.getSenderMbType()], false);

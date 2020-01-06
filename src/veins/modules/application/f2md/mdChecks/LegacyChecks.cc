@@ -620,10 +620,20 @@ BsmCheck LegacyChecks::CheckBSM(BasicSafetyMessage *bsm,
     Coord senderPos = bsm->getSenderPos();
     Coord senderPosConfidence = bsm->getSenderPosConfidence();
 
-    NodeHistory * senderNode = detectedNodes->getNodeHistoryAddr(
-            senderPseudonym);
+    NodeHistory * senderNode;
+    MDMHistory * senderMDM;
 
-    MDMHistory * senderMDM = detectedNodes->getMDMHistoryAddr(senderPseudonym);
+    NodeHistory nullNode = NodeHistory();
+    MDMHistory nullMDMNode = MDMHistory();
+
+    if(detectedNodes->includes(senderPseudonym)){
+        senderNode = detectedNodes->getNodeHistoryAddr(
+                senderPseudonym);
+        senderMDM = detectedNodes->getMDMHistoryAddr(senderPseudonym);
+    }else{
+        senderNode = &nullNode;
+        senderMDM = &nullMDMNode;
+    }
 
     bsmCheck.setRangePlausibility(
             RangePlausibilityCheck(&myPosition, &bsm->getSenderPos()));
@@ -638,7 +648,7 @@ BsmCheck LegacyChecks::CheckBSM(BasicSafetyMessage *bsm,
             PositionPlausibilityCheck(&senderPos,
                     mdmLib.calculateSpeedPtr(&bsm->getSenderSpeed())));
 
-    if (detectedNodes->getNodeHistoryAddr(senderPseudonym)->getBSMNum() > 0) {
+    if (senderNode->getBSMNum() > 0) {
 
         bsmCheck.setPositionConsistancy(
                 PositionConsistancyCheck(&senderPos,

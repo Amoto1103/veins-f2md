@@ -19,11 +19,12 @@ namespace mdChecksVersionTypes {
 enum ChecksVersion {
     LegacyChecks = 0,
     CatchChecks,
+    ExperiChecks,
     SIZE_OF_ENUM
 };
 
 static const char* ChecksVersionNames[] = { "LegacyChecks",
-        "CatchChecks"};
+        "CatchChecks", "ExperiChecks"};
 
 static_assert(sizeof(mdChecksVersionTypes::ChecksVersionNames)/sizeof(char*) == mdChecksVersionTypes::SIZE_OF_ENUM
         , "sizes dont match");

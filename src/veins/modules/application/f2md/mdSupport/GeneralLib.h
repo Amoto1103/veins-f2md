@@ -26,7 +26,9 @@ using namespace veins;
 class GeneralLib {
 public:
     GeneralLib();
-    Coord TypeToSize(std::string type);
+
+    double GaussianRandomDouble(double mean, double stddev);
+
     double RandomDouble(double fMin, double fMax);
     int RandomInt(int min, int max);
 };

@@ -77,9 +77,6 @@ double NodeHistory::getDeltaTime(int index1, int index2) {
                     - bsmList[index2].getArrivalTime().dbl());
 }
 
-BasicSafetyMessage* NodeHistory::getBSMList() {
-    return bsmList;
-}
 
 int NodeHistory::getBSMNum() {
     return bsmNum;

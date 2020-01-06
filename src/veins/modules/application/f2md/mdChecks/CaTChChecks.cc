@@ -862,11 +862,18 @@ BsmCheck CaTChChecks::CheckBSM(BasicSafetyMessage * bsm,
     unsigned long senderPseudonym = bsm->getSenderPseudonym();
     Coord senderPos = bsm->getSenderPos();
     Coord senderPosConfidence = bsm->getSenderPosConfidence();
-
-    NodeHistory * senderNode = detectedNodes->getNodeHistoryAddr(
-            senderPseudonym);
-
-    MDMHistory * senderMDM = detectedNodes->getMDMHistoryAddr(senderPseudonym);
+    NodeHistory * senderNode;
+    MDMHistory * senderMDM;
+    NodeHistory nullNode = NodeHistory();
+    MDMHistory nullMDMNode = MDMHistory();
+    if(detectedNodes->includes(senderPseudonym)){
+        senderNode = detectedNodes->getNodeHistoryAddr(
+                senderPseudonym);
+        senderMDM = detectedNodes->getMDMHistoryAddr(senderPseudonym);
+    }else{
+        senderNode = &nullNode;
+        senderMDM = &nullMDMNode;
+    }
 
     bsmCheck.setRangePlausibility(
             RangePlausibilityCheck(&myPosition, &myPositionConfidence,
@@ -886,7 +893,7 @@ BsmCheck CaTChChecks::CheckBSM(BasicSafetyMessage * bsm,
                     mdmLib.calculateSpeedPtr(
                             &bsm->getSenderSpeedConfidence())));
 
-    if (detectedNodes->getNodeHistoryAddr(senderPseudonym)->getBSMNum() > 0) {
+    if (senderNode->getBSMNum() > 0) {
         bsmCheck.setPositionConsistancy(
                 PositionConsistancyCheck(&senderPos, &senderPosConfidence,
                         &senderNode->getLatestBSMAddr()->getSenderPos(),
@@ -1052,7 +1059,6 @@ BsmCheck CaTChChecks::CheckBSM(BasicSafetyMessage * bsm,
 //    if(bsm->getSenderMbType() == 1){
 //    PrintBsmCheck(senderPseudonym, bsmCheck);
 //    }
-
     return bsmCheck;
 }
 
