@@ -63,7 +63,7 @@ bool BehavioralApp::CheckNodeForReport(unsigned long myPseudonym,
             }
             TimeOut[indexTMO] = TimeOut[indexTMO] - 1;
             if(TimeOut[indexTMO]<=0){
-                TimeOut[indexTMO] == 0;
+                TimeOut[indexTMO] = 0;
             }
         }
         if (TimeOut[indexTMO] <=0) {
