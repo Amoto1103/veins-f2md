@@ -28,6 +28,11 @@ static const char* ReportNames[] = { "OneMessageReport", "EvidenceReport", "Prot
 
 static_assert(sizeof(reportTypes::ReportNames)/sizeof(char*) == reportTypes::SIZE_OF_ENUM
         , "sizes dont match");
-}
 
+static const reportTypes::Report intReport[] = {OneMessageReport,EvidenceReport,ProtocolReport,BasicCheckReport};
+
+static_assert(sizeof(reportTypes::intReport)/sizeof(reportTypes::Report) == reportTypes::SIZE_OF_ENUM
+        , "sizes dont match");
+
+}
 #endif

@@ -29,9 +29,12 @@ protected:
     double lastMisbehavingTime[MAX_REP_PSEUDOS];
     int reportedPseudosNum = 0;
     void removeMisbehavingPseudo(int index);
+    F2MDParameters * params;
 
 public:
     ProtocolEnforcer();
+
+    void setParams(F2MDParameters * params);
 
     bool isReported(unsigned long pseudo);
 

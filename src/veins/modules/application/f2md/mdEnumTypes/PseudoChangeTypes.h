@@ -26,11 +26,18 @@ enum PseudoChange {
     SIZE_OF_ENUM
 };
 
-static const char* PseudoChangeNames[] = { "NoChange", "Periodical", "Disposable",
-        "DistanceBased", "Random" , "Car2car"};
+static const char* PseudoChangeNames[] = { "NoChange", "Periodical",
+        "Disposable", "DistanceBased", "Random", "Car2car" };
 
 static_assert(sizeof(pseudoChangeTypes::PseudoChangeNames)/sizeof(char*) == pseudoChangeTypes::SIZE_OF_ENUM
         , "sizes dont match");
+
+static const pseudoChangeTypes::PseudoChange intPseudoChange[] = { NoChange,
+        Periodical, Disposable, DistanceBased, Random, Car2car };
+
+static_assert(sizeof(pseudoChangeTypes::intPseudoChange)/sizeof(pseudoChangeTypes::PseudoChange) == pseudoChangeTypes::SIZE_OF_ENUM
+        , "sizes dont match");
+
 }
 
 #endif

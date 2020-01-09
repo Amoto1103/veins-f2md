@@ -19,12 +19,13 @@ PCPolicy::PCPolicy() {
     lastPos = Coord(0, 0, 0);
 }
 
-PCPolicy::PCPolicy(Coord curPos) {
+PCPolicy::PCPolicy(Coord curPos, F2MDParameters * params) {
     realPseudoNum = 0;
     messageToleranceBuffer = 0;
     lastChangeTime = simTime().dbl();
     cumulativeDistance = 0;
     lastPos = curPos;
+    this->params = params;
 }
 
 void PCPolicy::setMbType(mbTypes::Mbs mbType) {
@@ -98,14 +99,14 @@ void PCPolicy::checkPseudonymChange(pseudoChangeTypes::PseudoChange myPcType) {
 }
 
 void PCPolicy::periodicalPCP() {
-    if ((simTime().dbl() - lastChangeTime) > Period_Change_Time) {
+    if ((simTime().dbl() - lastChangeTime) > params->Period_Change_Time) {
         lastChangeTime = simTime().dbl();
         (*myPseudonym) = getNextPseudonym();
     }
 }
 
 void PCPolicy::disposablePCP() {
-    if (messageToleranceBuffer > Tolerance_Buffer) {
+    if (messageToleranceBuffer > params->Tolerance_Buffer) {
         messageToleranceBuffer = 0;
         (*myPseudonym) = getNextPseudonym();
     } else {
@@ -118,7 +119,7 @@ void PCPolicy::distanceBasedPCP() {
     lastPos = (*curPosition);
 
     cumulativeDistance = cumulativeDistance + stepDistance;
-    if (cumulativeDistance > Period_Change_Distance) {
+    if (cumulativeDistance > params->Period_Change_Distance) {
         (*myPseudonym) = getNextPseudonym();
         cumulativeDistance = 0;
     }
@@ -156,7 +157,7 @@ void PCPolicy::car2carPCP() {
 
 void PCPolicy::randomPCP() {
     double rnd = genLib.RandomDouble(0, 1);
-    if (rnd < Random_Change_Chance) {
+    if (rnd < params->Random_Change_Chance) {
         (*myPseudonym) = getNextPseudonym();
     }
 }

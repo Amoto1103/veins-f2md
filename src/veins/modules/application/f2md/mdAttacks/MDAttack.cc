@@ -14,7 +14,9 @@
 MDAttack::MDAttack() {
 }
 
-void MDAttack::init(attackTypes::Attacks myAttackType, double MaxRandomPosX,double MaxRandomPosY) {
+void MDAttack::init(attackTypes::Attacks myAttackType, double MaxRandomPosX,double MaxRandomPosY,F2MDParameters *params) {
+
+    this->params = params;
     StopInitiated = false;
     DoSInitiated = false;
 
@@ -27,45 +29,45 @@ void MDAttack::init(attackTypes::Attacks myAttackType, double MaxRandomPosX,doub
     ConstPosX = genLib.RandomDouble(0, MaxRandomPosX);
     ConstPosY = genLib.RandomDouble(0, MaxRandomPosY);
 
-    ConstPosOffsetX = genLib.RandomDouble((1-parVar) * RandomPosOffsetX,
-            (1+parVar) * RandomPosOffsetX);
-    ConstPosOffsetY = genLib.RandomDouble((1-parVar) * RandomPosOffsetY,
-            (1+parVar) * RandomPosOffsetY);
+    ConstPosOffsetX = genLib.RandomDouble((1-params->parVar) * params->RandomPosOffsetX,
+            (1+params->parVar) * params->RandomPosOffsetX);
+    ConstPosOffsetY = genLib.RandomDouble((1-params->parVar) * params->RandomPosOffsetY,
+            (1+params->parVar) * params->RandomPosOffsetY);
 
-    ConstSpeedX = genLib.RandomDouble(0, RandomSpeedX);
-    ConstSpeedY = genLib.RandomDouble(0, RandomSpeedY);
+    ConstSpeedX = genLib.RandomDouble(0, params->RandomSpeedX);
+    ConstSpeedY = genLib.RandomDouble(0, params->RandomSpeedY);
 
-    ConstSpeedOffsetX = genLib.RandomDouble((1-parVar) * RandomSpeedOffsetX,
-            (1+parVar) * RandomSpeedOffsetX);
-    ConstSpeedOffsetY = genLib.RandomDouble((1-parVar) * RandomSpeedOffsetY,
-            (1+parVar) * RandomSpeedOffsetY);
+    ConstSpeedOffsetX = genLib.RandomDouble((1-params->parVar) * params->RandomSpeedOffsetX,
+            (1+params->parVar) * params->RandomSpeedOffsetX);
+    ConstSpeedOffsetY = genLib.RandomDouble((1-params->parVar) * params->RandomSpeedOffsetY,
+            (1+params->parVar) * params->RandomSpeedOffsetY);
 
-    localStopProb = genLib.RandomDouble((1-parVar), (1+parVar)) * StopProb;
+    localStopProb = genLib.RandomDouble((1-params->parVar), (1+params->parVar)) * params->StopProb;
 
-    localReplaySeqNum = (int) genLib.RandomDouble((1-parVar), (1+parVar)) * ReplaySeqNum;
+    localReplaySeqNum = (int) genLib.RandomDouble((1-params->parVar), (1+params->parVar)) * params->ReplaySeqNum;
     if(localReplaySeqNum <2){
         localReplaySeqNum = 2;
     }
 
-    localDosMultipleFreq = (int) genLib.RandomDouble((1-parVar), (1+parVar)) * DosMultipleFreq;
+    localDosMultipleFreq = (int) genLib.RandomDouble((1-params->parVar), (1+params->parVar)) * params->DosMultipleFreq;
     if(localDosMultipleFreq <2){
         localDosMultipleFreq = 2;
     }
 
-    localDosMultipleFreqSybil = (int) genLib.RandomDouble((1-parVar), (1+parVar)) * DosMultipleFreqSybil;
+    localDosMultipleFreqSybil = (int) genLib.RandomDouble((1-params->parVar), (1+params->parVar)) * params->DosMultipleFreqSybil;
     if(localDosMultipleFreqSybil <2){
         localDosMultipleFreqSybil = 2;
     }
 
     ReplaySeq = 0;
 
-    localSybilVehNumber = (int) genLib.RandomDouble((1-parVar), (1+parVar)) * SybilVehNumber;
+    localSybilVehNumber = (int) genLib.RandomDouble((1-params->parVar), (1+params->parVar)) * params->SybilVehNumber;
     if(localSybilVehNumber < 1){
         localSybilVehNumber = 1;
     }
 
-    localSybilDistanceX = genLib.RandomDouble((1-parVar), (1+parVar)) * SybilDistanceX;
-    localSybilDistanceY = genLib.RandomDouble((1-parVar), (1+parVar)) * SybilDistanceY;
+    localSybilDistanceX = genLib.RandomDouble((1-params->parVar), (1+params->parVar)) * params->SybilDistanceX;
+    localSybilDistanceY = genLib.RandomDouble((1-params->parVar), (1+params->parVar)) * params->SybilDistanceY;
 
     if (myAttackType == attackTypes::GridSybil) {
         for (int var = 0; var < localSybilVehNumber; ++var) {
@@ -160,8 +162,8 @@ BasicSafetyMessage MDAttack::launchAttack(attackTypes::Attacks myAttackType,
         }
         staleMessagesBsm[0] = myBsm[0];
 
-        if (staleMessagesNum >= StaleMessages_Buffer) {
-            attackBsm = staleMessagesBsm[StaleMessages_Buffer];
+        if (staleMessagesNum >= params->StaleMessages_Buffer) {
+            attackBsm = staleMessagesBsm[params->StaleMessages_Buffer];
             attackBsm.setSenderPseudonym(*myPseudonym);
         } else {
             if (staleMessagesNum > 0) {
@@ -247,10 +249,10 @@ BasicSafetyMessage MDAttack::launchAttack(attackTypes::Attacks myAttackType,
         attackBsm = myBsm[0];
         attackBsm.setSenderPseudonym(*myPseudonym);
 
-        double randPosOffsetx = genLib.RandomDouble(0, RandomPosOffsetX)
-                - ((double) RandomPosOffsetX) / 2;
-        double randPosOffsety = genLib.RandomDouble(0, RandomPosOffsetY)
-                - ((double) RandomPosOffsetY) / 2;
+        double randPosOffsetx = genLib.RandomDouble(0, params->RandomPosOffsetX)
+                - ((double) params->RandomPosOffsetX) / 2;
+        double randPosOffsety = genLib.RandomDouble(0, params->RandomPosOffsetY)
+                - ((double) params->RandomPosOffsetY) / 2;
 
         attackBsm.setSenderPos(
                 Coord((*curPosition).x + randPosOffsetx,
@@ -320,8 +322,8 @@ BasicSafetyMessage MDAttack::launchAttack(attackTypes::Attacks myAttackType,
         attackBsm = myBsm[0];
         attackBsm.setSenderPseudonym(*myPseudonym);
 
-        double sx = genLib.RandomDouble(0, RandomSpeedX);
-        double sy = genLib.RandomDouble(0, RandomSpeedY);
+        double sx = genLib.RandomDouble(0, params->RandomSpeedX);
+        double sy = genLib.RandomDouble(0, params->RandomSpeedY);
 
         attackBsm.setSenderPos(*curPosition);
         attackBsm.setSenderPosConfidence(*curPositionConfidence);
@@ -347,10 +349,10 @@ BasicSafetyMessage MDAttack::launchAttack(attackTypes::Attacks myAttackType,
         double signX = genLib.RandomInt(0, 1);
         double signY = genLib.RandomInt(0, 1);
 
-        double sx = genLib.RandomDouble((1-parVar) * RandomSpeedOffsetX,
-                (1+parVar) * RandomSpeedOffsetX);
-        double sy = genLib.RandomDouble((1-parVar) * RandomSpeedOffsetX,
-                (1+parVar) * RandomSpeedOffsetX);
+        double sx = genLib.RandomDouble((1-params->parVar) * params->RandomSpeedOffsetX,
+                (1+params->parVar) * params->RandomSpeedOffsetX);
+        double sy = genLib.RandomDouble((1-params->parVar) * params->RandomSpeedOffsetX,
+                (1+params->parVar) * params->RandomSpeedOffsetX);
 
         sx = sx - 2 * signX * sx;
         sy = sy - 2 * signY * sy;
@@ -473,11 +475,11 @@ BasicSafetyMessage MDAttack::launchAttack(attackTypes::Attacks myAttackType,
         double x = genLib.RandomDouble(0, MaxRandomPosX);
         double y = genLib.RandomDouble(0, MaxRandomPosY);
 
-        double sx = genLib.RandomDouble(0, RandomSpeedX);
-        double sy = genLib.RandomDouble(0, RandomSpeedY);
+        double sx = genLib.RandomDouble(0, params->RandomSpeedX);
+        double sy = genLib.RandomDouble(0, params->RandomSpeedY);
 
-        double ax = genLib.RandomDouble(0, RandomAccelX);
-        double ay = genLib.RandomDouble(0, RandomAccelY);
+        double ax = genLib.RandomDouble(0, params->RandomAccelX);
+        double ay = genLib.RandomDouble(0, params->RandomAccelY);
 
         double hx = genLib.RandomDouble(-1, 1);
         double hy = genLib.RandomDouble(-1, 1);
@@ -532,7 +534,7 @@ BasicSafetyMessage MDAttack::launchAttack(attackTypes::Attacks myAttackType,
         int SquareX = SybilVehSeq / 2;
         int SquareY = SybilVehSeq % 2;
 
-        if (!SelfSybil) {
+        if (!params->SelfSybil) {
             if (detectedNodes->getNodesNum() > 0) {
                 attackBsm = *detectedNodes->getNextAttackedBsm(*curPosition,
                         saveAttackBsm.getSenderPseudonym(),
@@ -590,7 +592,7 @@ BasicSafetyMessage MDAttack::launchAttack(attackTypes::Attacks myAttackType,
 
                 double mapdistance = LinkC->calculateDistance(newSenderPos, 50,
                         50);
-                if (mapdistance > MAX_DISTANCE_FROM_ROUTE) {
+                if (mapdistance > params->MAX_DISTANCE_FROM_ROUTE) {
                     attackBsm.setSenderPseudonym(1);
                 }
 
@@ -803,7 +805,7 @@ BasicSafetyMessage MDAttack::launchAttack(attackTypes::Attacks myAttackType,
             saveHeading = curHeadingAngle;
 
             double mapdistance = LinkC->calculateDistance(newSenderPos, 50, 50);
-            if (mapdistance > MAX_DISTANCE_FROM_ROUTE) {
+            if (mapdistance > params->MAX_DISTANCE_FROM_ROUTE) {
                 attackBsm.setSenderPseudonym(1);
             }
 //             std::cout<<"SybilVehSeq:"<<SybilVehSeq<<"\n";
@@ -842,11 +844,11 @@ BasicSafetyMessage MDAttack::launchAttack(attackTypes::Attacks myAttackType,
         double x = genLib.RandomDouble(0, MaxRandomPosX);
         double y = genLib.RandomDouble(0, MaxRandomPosY);
 
-        double sx = genLib.RandomDouble(0, RandomSpeedX);
-        double sy = genLib.RandomDouble(0, RandomSpeedY);
+        double sx = genLib.RandomDouble(0, params->RandomSpeedX);
+        double sy = genLib.RandomDouble(0, params->RandomSpeedY);
 
-        double ax = genLib.RandomDouble(0, RandomAccelX);
-        double ay = genLib.RandomDouble(0, RandomAccelY);
+        double ax = genLib.RandomDouble(0, params->RandomAccelX);
+        double ay = genLib.RandomDouble(0, params->RandomAccelY);
 
         double hx = genLib.RandomDouble(-1, 1);
         double hy = genLib.RandomDouble(-1, 1);

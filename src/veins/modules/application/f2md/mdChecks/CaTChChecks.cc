@@ -25,7 +25,7 @@ using namespace boost;
 CaTChChecks::CaTChChecks(int version, unsigned long myPseudonym,
         Coord myPosition, Coord myPositionConfidence, Coord myHeading,
         Coord myHeadingConfidence, Coord mySize, Coord myLimits,
-        LinkControl* LinkC) {
+        LinkControl* LinkC, F2MDParameters *params) {
     this->version = version;
     this->myPseudonym = myPseudonym;
     this->myPosition = myPosition;
@@ -37,6 +37,7 @@ CaTChChecks::CaTChChecks(int version, unsigned long myPseudonym,
     this->MAX_PLAUSIBLE_ACCEL = myLimits.y;
     this->MAX_PLAUSIBLE_DECEL = myLimits.z;
     this->LinkC = LinkC;
+    this->params = params;
 }
 
 double CaTChChecks::RangePlausibilityCheck(Coord * receiverPosition,
@@ -48,7 +49,7 @@ double CaTChChecks::RangePlausibilityCheck(Coord * receiverPosition,
 
     double factor = mdmLib.CircleCircleFactor(distance,
             senderPositionConfidence->x, receiverPositionConfidence->x,
-            MAX_PLAUSIBLE_RANGE);
+            params->MAX_PLAUSIBLE_RANGE);
 
     return factor;
 }
@@ -109,7 +110,7 @@ double CaTChChecks::PositionSpeedMaxConsistancyCheck(Coord * curPosition,
         double curSpeedConfidence, double oldspeed, double oldSpeedConfidence,
         double time) {
 
-    if (time < MAX_TIME_DELTA) {
+    if (time < params->MAX_TIME_DELTA) {
 
         double distance = mdmLib.calculateDistancePtr(curPosition, oldPosition);
         double theoreticalSpeed = distance / time;
@@ -121,11 +122,11 @@ double CaTChChecks::PositionSpeedMaxConsistancyCheck(Coord * curPosition,
 
         double maxfactor = mdmLib.OneSidedCircleSegmentFactor(
                 maxspeed - theoreticalSpeed, curR, oldR,
-                (MAX_PLAUSIBLE_DECEL + MAX_MGT_RNG) * time);
+                (MAX_PLAUSIBLE_DECEL + params->MAX_MGT_RNG) * time);
 
         double minfactor = mdmLib.OneSidedCircleSegmentFactor(
                 theoreticalSpeed - minspeed, curR, oldR,
-                (MAX_PLAUSIBLE_ACCEL + MAX_MGT_RNG) * time);
+                (MAX_PLAUSIBLE_ACCEL + params->MAX_MGT_RNG) * time);
 
         double factor = 1;
 
@@ -173,7 +174,7 @@ double CaTChChecks::PositionSpeedConsistancyCheck(Coord * curPosition,
         double curSpeedConfidence, double oldspeed, double oldSpeedConfidence,
         double time) {
 
-    if (time < MAX_TIME_DELTA) {
+    if (time < params->MAX_TIME_DELTA) {
         double distance = mdmLib.calculateDistancePtr(curPosition, oldPosition);
 
         double curTest_1 = curSpeed + curSpeedConfidence;
@@ -188,7 +189,7 @@ double CaTChChecks::PositionSpeedConsistancyCheck(Coord * curPosition,
         }
         double minSpeed = std::min(curSpeed, oldspeed);
 
-        double addon_mgt_range = MAX_MGT_RNG_DOWN + 0.3571 * minSpeed
+        double addon_mgt_range = params->MAX_MGT_RNG_DOWN + 0.3571 * minSpeed
                 - 0.01694 * minSpeed * minSpeed;
         if (addon_mgt_range < 0) {
             addon_mgt_range = 0;
@@ -203,7 +204,7 @@ double CaTChChecks::PositionSpeedConsistancyCheck(Coord * curPosition,
                         oldPositionConfidence->x, retDistance_1[0]);
         double factorMax_1 = mdmLib.OneSidedCircleSegmentFactor(distance,
                 curPositionConfidence->x, oldPositionConfidence->x,
-                retDistance_1[1] + MAX_MGT_RNG_UP);
+                retDistance_1[1] + params->MAX_MGT_RNG_UP);
 
         double retDistance_2[2];
         mdmLib.calculateMaxMinDist(curTest_2, oldTest_2, time,
@@ -215,7 +216,7 @@ double CaTChChecks::PositionSpeedConsistancyCheck(Coord * curPosition,
                         retDistance_2[0] - addon_mgt_range);
         double factorMax_2 = mdmLib.OneSidedCircleSegmentFactor(distance,
                 curPositionConfidence->x, oldPositionConfidence->x,
-                retDistance_2[1] + MAX_MGT_RNG_UP);
+                retDistance_2[1] + params->MAX_MGT_RNG_UP);
 
         double retDistance_0[2];
         mdmLib.calculateMaxMinDist(curSpeed, oldspeed, time,
@@ -227,7 +228,7 @@ double CaTChChecks::PositionSpeedConsistancyCheck(Coord * curPosition,
                         retDistance_0[0] - addon_mgt_range);
         double factorMax_0 = mdmLib.OneSidedCircleSegmentFactor(distance,
                 curPositionConfidence->x, oldPositionConfidence->x,
-                retDistance_0[1] + MAX_MGT_RNG_UP);
+                retDistance_0[1] + params->MAX_MGT_RNG_UP);
 
         //return std::min(factorMin_0, factorMax_0);
 
@@ -264,7 +265,7 @@ double CaTChChecks::IntersectionCheck(Coord * nodePosition1,
             *nodeSize2);
 
     intFactor2 = 1.01
-            - intFactor2 * ((MAX_DELTA_INTER - deltaTime) / MAX_DELTA_INTER);
+            - intFactor2 * ((params->MAX_DELTA_INTER - deltaTime) / params->MAX_DELTA_INTER);
 
     if (intFactor2 > 1) {
         intFactor2 = 1;
@@ -307,7 +308,7 @@ InterTest CaTChChecks::MultipleIntersectionCheck(NodeTable * detectedNodes,
             double deltaTime = mdmLib.calculateDeltaTime(
                     varNode->getLatestBSMAddr(), bsm);
 
-            if (deltaTime < MAX_DELTA_INTER) {
+            if (deltaTime < params->MAX_DELTA_INTER) {
 
                 Coord varSize = Coord(
                         varNode->getLatestBSMAddr()->getSenderWidth(),
@@ -336,7 +337,7 @@ double CaTChChecks::SuddenAppearenceCheck(Coord * receiverPosition,
     double distance = mdmLib.calculateDistancePtr(senderPosition,
             receiverPosition);
 
-    double r2 = MAX_SA_RANGE + receiverPositionConfidence->x;
+    double r2 = params->MAX_SA_RANGE + receiverPositionConfidence->x;
 
     double factor = 0;
     if (senderPositionConfidence->x <= 0) {
@@ -367,7 +368,7 @@ double CaTChChecks::PositionPlausibilityCheck(Coord * senderPosition,
         speedd = 0;
     }
 
-    if (speedd <= MAX_NON_ROUTE_SPEED) {
+    if (speedd <= params->MAX_NON_ROUTE_SPEED) {
         return 1;
     }
 
@@ -381,7 +382,7 @@ double CaTChChecks::PositionPlausibilityCheck(Coord * senderPosition,
     double allCount = 1;
 
     if (LinkC->calculateDistance(*senderPosition, 50,
-            50) > MAX_DISTANCE_FROM_ROUTE) {
+            50) > params->MAX_DISTANCE_FROM_ROUTE) {
         failedCount++;
     }
 
@@ -395,7 +396,7 @@ double CaTChChecks::PositionPlausibilityCheck(Coord * senderPosition,
             Coord p(senderPosition->x + r * cos(2 * PI * t / resolutionTheta),
                     senderPosition->y + r * sin(2 * PI * t / resolutionTheta));
 
-            if (LinkC->calculateDistance(p, 50, 50) > MAX_DISTANCE_FROM_ROUTE) {
+            if (LinkC->calculateDistance(p, 50, 50) > params->MAX_DISTANCE_FROM_ROUTE) {
                 failedCount++;
             }
 
@@ -410,7 +411,7 @@ double CaTChChecks::PositionPlausibilityCheck(Coord * senderPosition,
 
 double CaTChChecks::BeaconFrequencyCheck(double timeNew, double timeOld) {
     double timeDelta = timeNew - timeOld;
-    if (timeDelta < MAX_BEACON_FREQUENCY) {
+    if (timeDelta < params->MAX_BEACON_FREQUENCY) {
         return 0;
     } else {
         return 1;
@@ -422,7 +423,7 @@ double CaTChChecks::PositionHeadingConsistancyCheck(Coord * curHeading,
         Coord * oldPositionConfidence, Coord * curPosition,
         Coord * curPositionConfidence, double deltaTime, double curSpeed,
         double curSpeedConfidence) {
-    if (deltaTime < POS_HEADING_TIME) {
+    if (deltaTime < params->POS_HEADING_TIME) {
         double distance = mdmLib.calculateDistancePtr(curPosition, oldPosition);
         if (distance < 1) {
             return 1;
@@ -457,7 +458,7 @@ double CaTChChecks::PositionHeadingConsistancyCheck(Coord * curHeading,
 
         double curFactorLow = 1;
         if (curPositionConfidence->x == 0) {
-            if (angleLow <= MAX_HEADING_CHANGE) {
+            if (angleLow <= params->MAX_HEADING_CHANGE) {
                 curFactorLow = 1;
             } else {
                 curFactorLow = 0;
@@ -472,7 +473,7 @@ double CaTChChecks::PositionHeadingConsistancyCheck(Coord * curHeading,
 
         double oldFactorLow = 1;
         if (oldPositionConfidence->x == 0) {
-            if (angleLow <= MAX_HEADING_CHANGE) {
+            if (angleLow <= params->MAX_HEADING_CHANGE) {
                 oldFactorLow = 1;
             } else {
                 oldFactorLow = 0;
@@ -488,7 +489,7 @@ double CaTChChecks::PositionHeadingConsistancyCheck(Coord * curHeading,
         double xHigh = distance * cos(angleHigh * PI / 180);
         double curFactorHigh = 1;
         if (curPositionConfidence->x == 0) {
-            if (angleHigh <= MAX_HEADING_CHANGE) {
+            if (angleHigh <= params->MAX_HEADING_CHANGE) {
                 curFactorHigh = 1;
             } else {
                 curFactorHigh = 0;
@@ -503,7 +504,7 @@ double CaTChChecks::PositionHeadingConsistancyCheck(Coord * curHeading,
 
         double oldFactorHigh = 1;
         if (oldPositionConfidence->x == 0) {
-            if (angleHigh <= MAX_HEADING_CHANGE) {
+            if (angleHigh <= params->MAX_HEADING_CHANGE) {
                 oldFactorHigh = 1;
             } else {
                 oldFactorHigh = 0;
@@ -577,30 +578,30 @@ void CaTChChecks::KalmanPositionSpeedConsistancyCheck(Coord * curPosition,
         retVal[0] = 1;
         retVal[1] = 1;
     } else {
-        if (time < MAX_KALMAN_TIME) {
+        if (time < params->MAX_KALMAN_TIME) {
             float Delta[4];
 
             double Ax = curAccel->x;
             double Ay = curAccel->y;
 
             double curPosConfX = curPositionConfidence->x;
-            if (curPosConfX < KALMAN_MIN_POS_RANGE) {
-                curPosConfX = KALMAN_MIN_POS_RANGE;
+            if (curPosConfX < params->KALMAN_MIN_POS_RANGE) {
+                curPosConfX = params->KALMAN_MIN_POS_RANGE;
             }
 
             double curPosConfY = curPositionConfidence->y;
-            if (curPosConfY < KALMAN_MIN_POS_RANGE) {
-                curPosConfY = KALMAN_MIN_POS_RANGE;
+            if (curPosConfY < params->KALMAN_MIN_POS_RANGE) {
+                curPosConfY = params->KALMAN_MIN_POS_RANGE;
             }
 
             double curSpdConfX = curSpeedConfidence->x;
-            if (curSpdConfX < KALMAN_MIN_SPEED_RANGE) {
-                curSpdConfX = KALMAN_MIN_SPEED_RANGE;
+            if (curSpdConfX < params->KALMAN_MIN_SPEED_RANGE) {
+                curSpdConfX = params->KALMAN_MIN_SPEED_RANGE;
             }
 
             double curSpdConfY = curSpeedConfidence->y;
-            if (curSpdConfY < KALMAN_MIN_SPEED_RANGE) {
-                curSpdConfY = KALMAN_MIN_SPEED_RANGE;
+            if (curSpdConfY < params->KALMAN_MIN_SPEED_RANGE) {
+                curSpdConfY = params->KALMAN_MIN_SPEED_RANGE;
             }
 
 //            kalmanSVI->kalmanFilterJ_SVI.matrixOp_SVI.printVec("X0a", kalmanSVI->kalmanFilterJ_SVI.X0, 4);
@@ -612,7 +613,7 @@ void CaTChChecks::KalmanPositionSpeedConsistancyCheck(Coord * curPosition,
 
             double ret_1 = 1
                     - sqrt(pow(Delta[0], 2.0) + pow(Delta[2], 2.0))
-                            / (KALMAN_POS_RANGE * curPosConfX * time);
+                            / (params->KALMAN_POS_RANGE * curPosConfX * time);
             if (isnan(ret_1)) {
                 ret_1 = 0;
             }
@@ -626,7 +627,7 @@ void CaTChChecks::KalmanPositionSpeedConsistancyCheck(Coord * curPosition,
 
             double ret_2 = 1
                     - sqrt(pow(Delta[1], 2.0) + pow(Delta[3], 2.0))
-                            / (KALMAN_SPEED_RANGE * curSpdConfX * time);
+                            / (params->KALMAN_SPEED_RANGE * curSpdConfX * time);
             if (isnan(ret_2)) {
                 ret_2 = 0;
             }
@@ -662,7 +663,7 @@ void CaTChChecks::KalmanPositionSpeedScalarConsistancyCheck(Coord * curPosition,
         retVal[0] = 1;
         retVal[1] = 1;
     } else {
-        if (time < MAX_KALMAN_TIME) {
+        if (time < params->MAX_KALMAN_TIME) {
 
             float Delta[2];
 
@@ -672,20 +673,20 @@ void CaTChChecks::KalmanPositionSpeedScalarConsistancyCheck(Coord * curPosition,
             double curacl = mdmLib.calculateSpeedPtr(curAccel);
 
             double curPosConfX = curPositionConfidence->x;
-            if (curPosConfX < KALMAN_MIN_POS_RANGE) {
-                curPosConfX = KALMAN_MIN_POS_RANGE;
+            if (curPosConfX < params->KALMAN_MIN_POS_RANGE) {
+                curPosConfX = params->KALMAN_MIN_POS_RANGE;
             }
 
             double curSpdConfX = curSpeedConfidence->x;
-            if (curSpdConfX < KALMAN_MIN_SPEED_RANGE) {
-                curSpdConfX = KALMAN_MIN_SPEED_RANGE;
+            if (curSpdConfX < params->KALMAN_MIN_SPEED_RANGE) {
+                curSpdConfX = params->KALMAN_MIN_SPEED_RANGE;
             }
 
             kalmanSC->getDeltaPos(time, distance, curspd, curacl, curacl,
                     curPosConfX, curSpdConfX, Delta);
 
             double ret_1 = 1
-                    - (Delta[0] / (KALMAN_POS_RANGE * curPosConfX * time));
+                    - (Delta[0] / (params->KALMAN_POS_RANGE * curPosConfX * time));
             if (isnan(ret_1)) {
                 ret_1 = 0;
             }
@@ -697,7 +698,7 @@ void CaTChChecks::KalmanPositionSpeedScalarConsistancyCheck(Coord * curPosition,
                 ret_1 = 0;
             }
             double ret_2 = 1
-                    - (Delta[1] / (KALMAN_SPEED_RANGE * curSpdConfX * time));
+                    - (Delta[1] / (params->KALMAN_SPEED_RANGE * curSpdConfX * time));
             if (isnan(ret_2)) {
                 ret_2 = 0;
             }
@@ -728,19 +729,19 @@ double CaTChChecks::KalmanPositionConsistancyCheck(Coord * curPosition,
     if (!kalmanSI->isInit()) {
         return 1;
     } else {
-        if (time < MAX_KALMAN_TIME) {
+        if (time < params->MAX_KALMAN_TIME) {
             float Delta[2];
             double Ax = (curPosition->x - oldPosition->x) / time;
             double Ay = (curPosition->y - oldPosition->y) / time;
 
             double curPosConfX = curPosConfidence->x;
-            if (curPosConfX < KALMAN_MIN_POS_RANGE) {
-                curPosConfX = KALMAN_MIN_POS_RANGE;
+            if (curPosConfX < params->KALMAN_MIN_POS_RANGE) {
+                curPosConfX = params->KALMAN_MIN_POS_RANGE;
             }
 
             double curPosConfY = curPosConfidence->y;
-            if (curPosConfY < KALMAN_MIN_POS_RANGE) {
-                curPosConfY = KALMAN_MIN_POS_RANGE;
+            if (curPosConfY < params->KALMAN_MIN_POS_RANGE) {
+                curPosConfY = params->KALMAN_MIN_POS_RANGE;
             }
 
             kalmanSI->getDeltaPos(time, curPosition->x, curPosition->y,
@@ -748,7 +749,7 @@ double CaTChChecks::KalmanPositionConsistancyCheck(Coord * curPosition,
 
             double ret_1 = 1
                     - sqrt(pow(Delta[0], 2.0) + pow(Delta[1], 2.0))
-                            / (4 * KALMAN_POS_RANGE * curPosConfX * time);
+                            / (4 * params->KALMAN_POS_RANGE * curPosConfX * time);
             if (isnan(ret_1)) {
                 ret_1 = 0;
             }
@@ -774,19 +775,19 @@ double CaTChChecks::KalmanPositionAccConsistancyCheck(Coord * curPosition,
     if (!kalmanSI->isInit()) {
         return 1;
     } else {
-        if (time < MAX_KALMAN_TIME) {
+        if (time < params->MAX_KALMAN_TIME) {
             float Delta[2];
             double Ax = curSpeed->x;
             double Ay = curSpeed->y;
 
             double curPosConfX = curPosConfidence->x;
-            if (curPosConfX < KALMAN_MIN_POS_RANGE) {
-                curPosConfX = KALMAN_MIN_POS_RANGE;
+            if (curPosConfX < params->KALMAN_MIN_POS_RANGE) {
+                curPosConfX = params->KALMAN_MIN_POS_RANGE;
             }
 
             double curPosConfY = curPosConfidence->y;
-            if (curPosConfY < KALMAN_MIN_POS_RANGE) {
-                curPosConfY = KALMAN_MIN_POS_RANGE;
+            if (curPosConfY < params->KALMAN_MIN_POS_RANGE) {
+                curPosConfY = params->KALMAN_MIN_POS_RANGE;
             }
 
             kalmanSI->getDeltaPos(time, curPosition->x, curPosition->y, Ax, Ay,
@@ -794,7 +795,7 @@ double CaTChChecks::KalmanPositionAccConsistancyCheck(Coord * curPosition,
 
             double ret_1 = 1
                     - sqrt(pow(Delta[0], 2.0) + pow(Delta[1], 2.0))
-                            / (4 * KALMAN_POS_RANGE * curPosConfX * time);
+                            / (4 * params->KALMAN_POS_RANGE * curPosConfX * time);
             if (isnan(ret_1)) {
                 ret_1 = 0;
             }
@@ -819,16 +820,16 @@ double CaTChChecks::KalmanSpeedConsistancyCheck(Coord * curSpeed,
     if (!kalmanSI->isInit()) {
         return 1;
     } else {
-        if (time < MAX_KALMAN_TIME) {
+        if (time < params->MAX_KALMAN_TIME) {
             float Delta[2];
             double curSpdConfX = curSpeedConfidence->x;
-            if (curSpdConfX < KALMAN_MIN_SPEED_RANGE) {
-                curSpdConfX = KALMAN_MIN_SPEED_RANGE;
+            if (curSpdConfX < params->KALMAN_MIN_SPEED_RANGE) {
+                curSpdConfX = params->KALMAN_MIN_SPEED_RANGE;
             }
 
             double curSpdConfY = curSpeedConfidence->y;
-            if (curSpdConfY < KALMAN_MIN_SPEED_RANGE) {
-                curSpdConfY = KALMAN_MIN_SPEED_RANGE;
+            if (curSpdConfY < params->KALMAN_MIN_SPEED_RANGE) {
+                curSpdConfY = params->KALMAN_MIN_SPEED_RANGE;
             }
 
             kalmanSI->getDeltaPos(time, curSpeed->x, curSpeed->y, curAccel->x,
@@ -836,7 +837,7 @@ double CaTChChecks::KalmanSpeedConsistancyCheck(Coord * curSpeed,
 
             double ret_1 = 1
                     - sqrt(pow(Delta[0], 2.0) + pow(Delta[1], 2.0))
-                            / (KALMAN_SPEED_RANGE * curSpdConfX * time);
+                            / (params->KALMAN_SPEED_RANGE * curSpdConfX * time);
             if (isnan(ret_1)) {
                 ret_1 = 0;
             }
@@ -959,7 +960,7 @@ BsmCheck CaTChChecks::CheckBSM(BasicSafetyMessage * bsm,
                                 senderNode->getLatestBSMAddr())));
 
         if (mdmLib.calculateDeltaTime(bsm,
-                senderNode->getLatestBSMAddr())> MAX_SA_TIME) {
+                senderNode->getLatestBSMAddr())> params->MAX_SA_TIME) {
             bsmCheck.setSuddenAppearence(
                     SuddenAppearenceCheck(&senderPos, &senderPosConfidence,
                             &myPosition, &myPositionConfidence));

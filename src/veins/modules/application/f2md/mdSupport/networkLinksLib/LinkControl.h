@@ -53,7 +53,7 @@ using namespace omnetpp;
 class LinkControl {
 public:
     ~LinkControl();
-    void initialize(TraCICommandInterface* traci);
+    void initialize(F2MDParameters * params,TraCICommandInterface* traci);
 
     void finish();
     void addShape(
@@ -67,6 +67,7 @@ public:
     double calculateDistance(const Coord& pos, double deltaX, double deltaY);
 
 protected:
+    F2MDParameters * params;
     struct CacheKey {
         const Coord senderPos;
         const Coord receiverPos;

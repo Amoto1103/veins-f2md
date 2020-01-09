@@ -55,6 +55,7 @@ private:
     double MAX_PLAUSIBLE_SPEED = 0;
     double MAX_PLAUSIBLE_ACCEL = 0;
     double MAX_PLAUSIBLE_DECEL = 0;
+    F2MDParameters * params;
 
     double RangePlausibilityCheck(Coord*, Coord*, Coord*, Coord*);
     double PositionPlausibilityCheck(Coord*, Coord*, double, double);
@@ -119,7 +120,7 @@ public:
     ExperiChecks(int version, unsigned long myPseudonym, Coord myPosition,
             Coord myPositionConfidence, Coord myHeading,
             Coord myHeadingConfidence, Coord mySize, Coord myLimits,
-            LinkControl* LinkC);
+            LinkControl* LinkC,F2MDParameters * params);
     BsmCheck CheckBSM(BasicSafetyMessage * bsm, NodeTable * detectedNodes);
 
 };

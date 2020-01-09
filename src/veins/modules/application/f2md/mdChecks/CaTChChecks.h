@@ -52,6 +52,8 @@ private:
 
     LinkControl* LinkC;
 
+    F2MDParameters * params;
+
     double MAX_PLAUSIBLE_SPEED = 0;
     double MAX_PLAUSIBLE_ACCEL = 0;
     double MAX_PLAUSIBLE_DECEL = 0;
@@ -119,7 +121,7 @@ public:
     CaTChChecks(int version, unsigned long myPseudonym, Coord myPosition,
             Coord myPositionConfidence, Coord myHeading,
             Coord myHeadingConfidence, Coord mySize, Coord myLimits,
-            LinkControl* LinkC);
+            LinkControl* LinkC, F2MDParameters*params);
     BsmCheck CheckBSM(BasicSafetyMessage * bsm, NodeTable * detectedNodes);
 
 };

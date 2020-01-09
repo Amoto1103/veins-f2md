@@ -28,7 +28,7 @@ static double print_count = 0;
 
 LegacyChecks::LegacyChecks(int version, unsigned long myPseudonym,
         Coord myPosition, Coord mySpeed, Coord myHeading, Coord mySize,
-        Coord myLimits, LinkControl* LinkC) {
+        Coord myLimits, LinkControl* LinkC, F2MDParameters * params) {
     this->version = version;
     this->myPseudonym = myPseudonym;
     this->myPosition = myPosition;
@@ -41,6 +41,8 @@ LegacyChecks::LegacyChecks(int version, unsigned long myPseudonym,
     this->MAX_PLAUSIBLE_DECEL = myLimits.z;
 
     this->LinkC = LinkC;
+
+    this->params = params;
 }
 
 double LegacyChecks::RangePlausibilityCheck(Coord *senderPosition,
@@ -48,7 +50,7 @@ double LegacyChecks::RangePlausibilityCheck(Coord *senderPosition,
     double distance = mdmLib.calculateDistancePtr(senderPosition,
             receiverPosition);
 
-    if (distance < MAX_PLAUSIBLE_RANGE) {
+    if (distance < params->MAX_PLAUSIBLE_RANGE) {
         return 1;
     } else {
         return 0; //distance
@@ -96,7 +98,7 @@ double LegacyChecks::SpeedConsistancyCheck(double curSpeed, double oldspeed,
 
 double LegacyChecks::PositionSpeedMaxConsistancyCheck(Coord *curPosition,
         Coord * oldPosition, double curSpeed, double oldspeed, double time) {
-    if (time < MAX_TIME_DELTA) {
+    if (time < params->MAX_TIME_DELTA) {
         double distance = mdmLib.calculateDistancePtr(curPosition, oldPosition);
         double theoreticalSpeed = distance / time;
         //double realspeed = fabs(curSpeed + oldspeed)/2;
@@ -106,10 +108,10 @@ double LegacyChecks::PositionSpeedMaxConsistancyCheck(Coord *curPosition,
         double deltaMax = maxspeed - theoreticalSpeed;
         double deltaMin = theoreticalSpeed - minspeed;
 
-        if (deltaMax > (MAX_PLAUSIBLE_DECEL + MAX_MGT_RNG) * time) {
+        if (deltaMax > (MAX_PLAUSIBLE_DECEL + params->MAX_MGT_RNG) * time) {
             return 0; // deltaMax - MIN_PSS
         } else {
-            if (deltaMin > (MAX_PLAUSIBLE_ACCEL + MAX_MGT_RNG) * time) {
+            if (deltaMin > (MAX_PLAUSIBLE_ACCEL + params->MAX_MGT_RNG) * time) {
                 return 0; // deltaMin - MAX_PSS
             } else {
                 return 1;
@@ -122,7 +124,7 @@ double LegacyChecks::PositionSpeedMaxConsistancyCheck(Coord *curPosition,
 
 double LegacyChecks::PositionSpeedConsistancyCheck(Coord *curPosition,
         Coord * oldPosition, double curSpeed, double oldspeed, double time) {
-    if (time < MAX_TIME_DELTA) {
+    if (time < params->MAX_TIME_DELTA) {
         double distance = mdmLib.calculateDistancePtr(curPosition, oldPosition);
         double curminspeed = std::min(curSpeed, oldspeed);
         //double theoreticalSpeed = distance / time;
@@ -131,14 +133,14 @@ double LegacyChecks::PositionSpeedConsistancyCheck(Coord *curPosition,
                 MAX_PLAUSIBLE_ACCEL, MAX_PLAUSIBLE_DECEL, MAX_PLAUSIBLE_SPEED,
                 retDistance);
 
-        double addon_mgt_range = MAX_MGT_RNG_DOWN + 0.3571 * curminspeed
+        double addon_mgt_range = params->MAX_MGT_RNG_DOWN + 0.3571 * curminspeed
                 - 0.01694 * curminspeed * curminspeed;
         if (addon_mgt_range < 0) {
             addon_mgt_range = 0;
         }
 
         double deltaMin = distance - retDistance[0] + addon_mgt_range;
-        double deltaMax = retDistance[1] - distance + MAX_MGT_RNG_UP;
+        double deltaMax = retDistance[1] - distance + params->MAX_MGT_RNG_UP;
 
         if (deltaMin < 0 || deltaMax < 0) {
             return 0;
@@ -172,7 +174,7 @@ double LegacyChecks::IntersectionCheck(Coord nodePosition1, Coord nodeSize1,
             heading2, Coord(nodeSize1.x, nodeSize1.y),
             Coord(nodeSize2.x, nodeSize2.y));
 
-    inter = inter * ((MAX_DELTA_INTER - deltaTime) / MAX_DELTA_INTER);
+    inter = inter * ((params->MAX_DELTA_INTER - deltaTime) / params->MAX_DELTA_INTER);
 
 //    if (inter > 0.5){
 //
@@ -244,7 +246,7 @@ InterTest LegacyChecks::MultipleIntersectionCheck(NodeTable * detectedNodes,
                     detectedNodes->getNodePseudo(var));
             double deltaTime = mdmLib.calculateDeltaTime(
                     varNode->getLatestBSMAddr(), bsm);
-            if (deltaTime < MAX_DELTA_INTER) {
+            if (deltaTime < params->MAX_DELTA_INTER) {
 
                 INTScore = IntersectionCheck(varNode->getSenderPos(0),
                         varNode->getSenderSize(0), varNode->getSenderHeading(0),
@@ -267,7 +269,7 @@ double LegacyChecks::SuddenAppearenceCheck(Coord *senderPosition,
     double distance = mdmLib.calculateDistancePtr(senderPosition,
             receiverPosition);
 
-    if (distance < MAX_SA_RANGE) {
+    if (distance < params->MAX_SA_RANGE) {
         return 0; //distance
     } else {
         return 1;
@@ -276,13 +278,13 @@ double LegacyChecks::SuddenAppearenceCheck(Coord *senderPosition,
 
 double LegacyChecks::PositionPlausibilityCheck(Coord *senderPosition,
         double senderSpeed) {
-    if (senderSpeed <= MAX_NON_ROUTE_SPEED) {
+    if (senderSpeed <= params->MAX_NON_ROUTE_SPEED) {
         return 1;
     }
 
     double distance = LinkC->calculateDistance(*senderPosition, 50, 50);
 
-    if (distance > MAX_DISTANCE_FROM_ROUTE) {
+    if (distance > params->MAX_DISTANCE_FROM_ROUTE) {
         return 0;
     } else {
         return 1;
@@ -292,7 +294,7 @@ double LegacyChecks::PositionPlausibilityCheck(Coord *senderPosition,
 double LegacyChecks::BeaconFrequencyCheck(double timeNew, double timeOld) {
     double timeDelta = timeNew - timeOld;
 
-    if (timeDelta < MAX_BEACON_FREQUENCY) {
+    if (timeDelta < params->MAX_BEACON_FREQUENCY) {
         return 0;
     } else {
         return 1;
@@ -302,7 +304,7 @@ double LegacyChecks::BeaconFrequencyCheck(double timeNew, double timeOld) {
 double LegacyChecks::PositionHeadingConsistancyCheck(Coord * curHeading,
         Coord * curPosition, Coord * oldPosition, double deltaTime,
         double curSpeed) {
-    if (deltaTime < POS_HEADING_TIME) {
+    if (deltaTime < params->POS_HEADING_TIME) {
         double distance = mdmLib.calculateDistancePtr(curPosition, oldPosition);
         if (distance < 1) {
             return 1;
@@ -322,7 +324,7 @@ double LegacyChecks::PositionHeadingConsistancyCheck(Coord * curHeading,
             angleDelta = 360 - angleDelta;
         }
 
-        if (MAX_HEADING_CHANGE < angleDelta) {
+        if (params->MAX_HEADING_CHANGE < angleDelta) {
             return 0; //  angleDelta - MAX_HEADING_CHANGE
         } else {
             return 1;
@@ -341,30 +343,30 @@ void LegacyChecks::KalmanPositionSpeedConsistancyCheck(Coord * curPosition,
         retVal[0] = 1;
         retVal[1] = 1;
     } else {
-        if (time < MAX_KALMAN_TIME) {
+        if (time < params->MAX_KALMAN_TIME) {
             float Delta[4];
 
             double Ax = curAccel->x;
             double Ay = curAccel->y;
 
             double curPosConfX = curPositionConfidence->x;
-            if (curPosConfX < KALMAN_MIN_POS_RANGE) {
-                curPosConfX = KALMAN_MIN_POS_RANGE;
+            if (curPosConfX < params->KALMAN_MIN_POS_RANGE) {
+                curPosConfX = params->KALMAN_MIN_POS_RANGE;
             }
 
             double curPosConfY = curPositionConfidence->y;
-            if (curPosConfY < KALMAN_MIN_POS_RANGE) {
-                curPosConfY = KALMAN_MIN_POS_RANGE;
+            if (curPosConfY < params->KALMAN_MIN_POS_RANGE) {
+                curPosConfY = params->KALMAN_MIN_POS_RANGE;
             }
 
             double curSpdConfX = curSpeedConfidence->x;
-            if (curSpdConfX < KALMAN_MIN_SPEED_RANGE) {
-                curSpdConfX = KALMAN_MIN_SPEED_RANGE;
+            if (curSpdConfX < params->KALMAN_MIN_SPEED_RANGE) {
+                curSpdConfX = params->KALMAN_MIN_SPEED_RANGE;
             }
 
             double curSpdConfY = curSpeedConfidence->y;
-            if (curSpdConfY < KALMAN_MIN_SPEED_RANGE) {
-                curSpdConfY = KALMAN_MIN_SPEED_RANGE;
+            if (curSpdConfY < params->KALMAN_MIN_SPEED_RANGE) {
+                curSpdConfY = params->KALMAN_MIN_SPEED_RANGE;
             }
 
 //            kalmanSVI->kalmanFilterJ_SVI.matrixOp_SVI.printVec("X0a", kalmanSVI->kalmanFilterJ_SVI.X0, 4);
@@ -376,7 +378,7 @@ void LegacyChecks::KalmanPositionSpeedConsistancyCheck(Coord * curPosition,
 
             double ret_1 = 1
                     - sqrt(pow(Delta[0], 2.0) + pow(Delta[2], 2.0))
-                            / (KALMAN_POS_RANGE * curPosConfX * time);
+                            / (params->KALMAN_POS_RANGE * curPosConfX * time);
             if (isnan(ret_1)) {
                 ret_1 = 0;
             }
@@ -389,7 +391,7 @@ void LegacyChecks::KalmanPositionSpeedConsistancyCheck(Coord * curPosition,
 
             double ret_2 = 1
                     - sqrt(pow(Delta[1], 2.0) + pow(Delta[3], 2.0))
-                            / (KALMAN_SPEED_RANGE * curSpdConfX * time);
+                            / (params->KALMAN_SPEED_RANGE * curSpdConfX * time);
             if (isnan(ret_2)) {
                 ret_2 = 0;
             }
@@ -424,7 +426,7 @@ void LegacyChecks::KalmanPositionSpeedScalarConsistancyCheck(
         retVal[0] = 1;
         retVal[1] = 1;
     } else {
-        if (time < MAX_KALMAN_TIME) {
+        if (time < params->MAX_KALMAN_TIME) {
 
             float Delta[2];
 
@@ -434,20 +436,20 @@ void LegacyChecks::KalmanPositionSpeedScalarConsistancyCheck(
             double curacl = mdmLib.calculateSpeedPtr(curAccel);
 
             double curPosConfX = curPositionConfidence->x;
-            if (curPosConfX < KALMAN_MIN_POS_RANGE) {
-                curPosConfX = KALMAN_MIN_POS_RANGE;
+            if (curPosConfX < params->KALMAN_MIN_POS_RANGE) {
+                curPosConfX = params->KALMAN_MIN_POS_RANGE;
             }
 
             double curSpdConfX = curSpeedConfidence->x;
-            if (curSpdConfX < KALMAN_MIN_SPEED_RANGE) {
-                curSpdConfX = KALMAN_MIN_SPEED_RANGE;
+            if (curSpdConfX < params->KALMAN_MIN_SPEED_RANGE) {
+                curSpdConfX = params->KALMAN_MIN_SPEED_RANGE;
             }
 
             kalmanSC->getDeltaPos(time, distance, curspd, curacl, curacl,
                     curPosConfX, curSpdConfX, Delta);
 
             double ret_1 = 1
-                    - (Delta[0] / (KALMAN_POS_RANGE * curPosConfX * time));
+                    - (Delta[0] / (params->KALMAN_POS_RANGE * curPosConfX * time));
             if (isnan(ret_1)) {
                 ret_1 = 0;
             }
@@ -458,7 +460,7 @@ void LegacyChecks::KalmanPositionSpeedScalarConsistancyCheck(
                 ret_1 = 1;
             }
             double ret_2 = 1
-                    - (Delta[1] / (KALMAN_SPEED_RANGE * curSpdConfX * time));
+                    - (Delta[1] / (params->KALMAN_SPEED_RANGE * curSpdConfX * time));
             if (isnan(ret_2)) {
                 ret_2 = 0;
             }
@@ -488,19 +490,19 @@ double LegacyChecks::KalmanPositionConsistancyCheck(Coord * curPosition,
     if (!kalmanSI->isInit()) {
         return 1;
     } else {
-        if (time < MAX_KALMAN_TIME) {
+        if (time < params->MAX_KALMAN_TIME) {
             float Delta[2];
             double Ax = (curPosition->x - oldPosition->x) / time;
             double Ay = (curPosition->y - oldPosition->y) / time;
 
             double curPosConfX = curPosConfidence->x;
-            if (curPosConfX < KALMAN_MIN_POS_RANGE) {
-                curPosConfX = KALMAN_MIN_POS_RANGE;
+            if (curPosConfX < params->KALMAN_MIN_POS_RANGE) {
+                curPosConfX = params->KALMAN_MIN_POS_RANGE;
             }
 
             double curPosConfY = curPosConfidence->y;
-            if (curPosConfY < KALMAN_MIN_POS_RANGE) {
-                curPosConfY = KALMAN_MIN_POS_RANGE;
+            if (curPosConfY < params->KALMAN_MIN_POS_RANGE) {
+                curPosConfY = params->KALMAN_MIN_POS_RANGE;
             }
 
             kalmanSI->getDeltaPos(time, curPosition->x, curPosition->y,
@@ -508,7 +510,7 @@ double LegacyChecks::KalmanPositionConsistancyCheck(Coord * curPosition,
 
             double ret_1 = 1
                     - sqrt(pow(Delta[0], 2.0) + pow(Delta[1], 2.0))
-                            / (4 * KALMAN_POS_RANGE * curPosConfX * time);
+                            / (4 * params->KALMAN_POS_RANGE * curPosConfX * time);
 
             if (isnan(ret_1)) {
                 ret_1 = 0;
@@ -533,19 +535,19 @@ double LegacyChecks::KalmanPositionAccConsistancyCheck(Coord * curPosition,
     if (!kalmanSI->isInit()) {
         return 1;
     } else {
-        if (time < MAX_KALMAN_TIME) {
+        if (time < params->MAX_KALMAN_TIME) {
             float Delta[2];
             double Ax = curSpeed->x;
             double Ay = curSpeed->y;
 
             double curPosConfX = curPosConfidence->x;
-            if (curPosConfX < KALMAN_MIN_POS_RANGE) {
-                curPosConfX = KALMAN_MIN_POS_RANGE;
+            if (curPosConfX < params->KALMAN_MIN_POS_RANGE) {
+                curPosConfX = params->KALMAN_MIN_POS_RANGE;
             }
 
             double curPosConfY = curPosConfidence->y;
-            if (curPosConfY < KALMAN_MIN_POS_RANGE) {
-                curPosConfY = KALMAN_MIN_POS_RANGE;
+            if (curPosConfY < params->KALMAN_MIN_POS_RANGE) {
+                curPosConfY = params->KALMAN_MIN_POS_RANGE;
             }
 
             kalmanSI->getDeltaPos(time, curPosition->x, curPosition->y, Ax, Ay,
@@ -553,7 +555,7 @@ double LegacyChecks::KalmanPositionAccConsistancyCheck(Coord * curPosition,
 
             double ret_1 = 1
                     - sqrt(pow(Delta[0], 2.0) + pow(Delta[1], 2.0))
-                            / (4 * KALMAN_POS_RANGE * curPosConfX * time);
+                            / (4 * params->KALMAN_POS_RANGE * curPosConfX * time);
             if (isnan(ret_1)) {
                 ret_1 = 0;
             }
@@ -577,16 +579,16 @@ double LegacyChecks::KalmanSpeedConsistancyCheck(Coord * curSpeed,
     if (!kalmanSI->isInit()) {
         return 1;
     } else {
-        if (time < MAX_KALMAN_TIME) {
+        if (time < params->MAX_KALMAN_TIME) {
             float Delta[2];
             double curSpdConfX = curSpeedConfidence->x;
-            if (curSpdConfX < KALMAN_MIN_SPEED_RANGE) {
-                curSpdConfX = KALMAN_MIN_SPEED_RANGE;
+            if (curSpdConfX < params->KALMAN_MIN_SPEED_RANGE) {
+                curSpdConfX = params->KALMAN_MIN_SPEED_RANGE;
             }
 
             double curSpdConfY = curSpeedConfidence->y;
-            if (curSpdConfY < KALMAN_MIN_SPEED_RANGE) {
-                curSpdConfY = KALMAN_MIN_SPEED_RANGE;
+            if (curSpdConfY < params->KALMAN_MIN_SPEED_RANGE) {
+                curSpdConfY = params->KALMAN_MIN_SPEED_RANGE;
             }
 
             kalmanSI->getDeltaPos(time, curSpeed->x, curSpeed->y, curAccel->x,
@@ -594,7 +596,7 @@ double LegacyChecks::KalmanSpeedConsistancyCheck(Coord * curSpeed,
 
             double ret_1 = 1
                     - sqrt(pow(Delta[0], 2.0) + pow(Delta[1], 2.0))
-                            / (KALMAN_SPEED_RANGE * curSpdConfX * time);
+                            / (params->KALMAN_SPEED_RANGE * curSpdConfX * time);
             if (isnan(ret_1)) {
                 ret_1 = 0;
             }
@@ -694,7 +696,7 @@ BsmCheck LegacyChecks::CheckBSM(BasicSafetyMessage *bsm,
                                 senderNode->getLatestBSMAddr())));
 
         if (mdmLib.calculateDeltaTime(bsm,
-                senderNode->getLatestBSMAddr()) > MAX_SA_TIME) {
+                senderNode->getLatestBSMAddr()) > params->MAX_SA_TIME) {
             bsmCheck.setSuddenAppearence(
                     SuddenAppearenceCheck(&senderPos, &myPosition));
         }

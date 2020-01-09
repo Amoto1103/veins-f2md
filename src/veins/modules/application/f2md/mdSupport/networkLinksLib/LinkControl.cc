@@ -24,7 +24,8 @@ LinkControl::~LinkControl() {
 
 }
 
-void LinkControl::initialize(TraCICommandInterface* traci) {
+void LinkControl::initialize(F2MDParameters * params,TraCICommandInterface* traci) {
+    this->params = params;
     for (auto const& id : traci->getLaneIds()) {
        std::list<Coord> slist = traci->lane(id).getShape();
        vector<Coord> vec1;
@@ -129,7 +130,7 @@ double LinkControl::calculateDistance(const Coord& pos, double deltaX, double de
                 localD = o->getDistance(&pos);
                 if(localD<distance){
                     distance = localD;
-                    if(localD<MAX_DISTANCE_FROM_ROUTE){
+                    if(localD<params->MAX_DISTANCE_FROM_ROUTE){
                         return localD;
                     }
                 }

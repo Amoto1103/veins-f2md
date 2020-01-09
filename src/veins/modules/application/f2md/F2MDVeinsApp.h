@@ -62,6 +62,8 @@ using namespace std::chrono;
 
 #include <veins/modules/application/f2md/mdSupport/HTTPRequest.h>
 
+#include <veins/modules/application/f2md/F2MDParameters.h>
+
 #define mlHostV1 "localhost"
 #define mlHostV2 "localhost"
 #define mlPortV1 9997
@@ -99,6 +101,11 @@ static std::string attackHost = "localhost";
 //static std::string attackHost = "192.168.60.144";
 static int attackPort = 9975;
 static LocalAttackServer localAttackServer = LocalAttackServer(attackPort, attackHost);
+
+static F2MDParameters params;
+
+static int LastLocalAttackIndex = -1;
+static double VeReMiSliceStartTime = 0;
 
 class JosephVeinsApp: public BaseWaveApplLayer {
 private:
@@ -184,7 +191,6 @@ protected:
 
     void handleReportProtocol(bool lastTimeStep);
 
-
     VeReMiPrintable VeReMi = VeReMiPrintable();
 
 
@@ -232,6 +238,8 @@ protected:
     double deltaSpeed = 0;
     double deltaHeading = 0;
     double deltaAccel = 0;
+
+
     /* F2MD */
 
 public:

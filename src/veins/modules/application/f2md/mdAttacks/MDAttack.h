@@ -99,12 +99,14 @@ protected:
     double localSybilDistanceX = 0;
     double localSybilDistanceY = 0;
 
+    F2MDParameters *params;
+
 
 public:
 
     MDAttack();
 
-    void init(attackTypes::Attacks myAttackType, double MaxRandomPosX,double MaxRandomPosY);
+    void init(attackTypes::Attacks myAttackType, double MaxRandomPosX,double MaxRandomPosY,F2MDParameters *params);
 
     BasicSafetyMessage launchAttack(attackTypes::Attacks myAttackType, LinkControl* LinkC);
 

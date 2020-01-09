@@ -44,12 +44,14 @@ protected:
     mbTypes::Mbs mbType;
     MDStatistics* mdAuthority;
 
+    F2MDParameters * params;
+
 public:
     unsigned long getNextPseudonym();
 
 public:
     PCPolicy();
-    PCPolicy(Coord curPos);
+    PCPolicy(Coord curPos, F2MDParameters * params);
     void setCurPosition(Coord* curPosition);
     void setMyId(LAddress::L2Type* myId);
     void setMyPseudonym(unsigned long* myPseudonym);

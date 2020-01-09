@@ -27,11 +27,16 @@ enum App {
     SIZE_OF_ENUM
 };
 
-static const char* AppNames[] = { "ThresholdApp",
-        "AggrigationApp","CooperativeApp", "BehavioralApp", "ExperiApp",
-        "PyBridgeApp" };
+static const char* AppNames[] = { "ThresholdApp", "AggrigationApp",
+        "CooperativeApp", "BehavioralApp", "ExperiApp", "PyBridgeApp" };
 
 static_assert(sizeof(mdAppTypes::AppNames)/sizeof(char*) == mdAppTypes::SIZE_OF_ENUM
+        , "sizes dont match");
+
+static const mdAppTypes::App intApp[] = { ThresholdApp, AggrigationApp,
+        BehavioralApp, CooperativeApp, ExperiApp, PyBridgeApp };
+
+static_assert(sizeof(mdAppTypes::intApp)/sizeof(mdAppTypes::App) == mdAppTypes::SIZE_OF_ENUM
         , "sizes dont match");
 
 }

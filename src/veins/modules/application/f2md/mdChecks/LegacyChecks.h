@@ -45,6 +45,8 @@ private:
 
     LinkControl* LinkC;
 
+    F2MDParameters * params;
+
     double RangePlausibilityCheck(Coord*, Coord*);
     double PositionConsistancyCheck(Coord*, Coord*, double);
     double SpeedConsistancyCheck(double, double, double);
@@ -90,7 +92,7 @@ private:
 public:
 
     LegacyChecks(int version, unsigned long myPseudonym, Coord myPosition, Coord mySpeed,
-            Coord myHeading, Coord mySize, Coord myLimits, LinkControl* LinkC);
+            Coord myHeading, Coord mySize, Coord myLimits, LinkControl* LinkC, F2MDParameters * params);
     BsmCheck CheckBSM(BasicSafetyMessage * bsm, NodeTable * detectedNodes);
 
 };

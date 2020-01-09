@@ -15,6 +15,10 @@ ProtocolEnforcer::ProtocolEnforcer() {
     reportedPseudosNum = 0;
 }
 
+void ProtocolEnforcer::setParams(F2MDParameters * params){
+    this->params = params;
+}
+
 bool ProtocolEnforcer::isReported(unsigned long pseudo){
     for (int var = 0; var < reportedPseudosNum; ++var) {
         if(reportedPseudos[var] == pseudo){
@@ -51,14 +55,14 @@ bool ProtocolEnforcer::addMisbehavingPseudo(unsigned long pseudo, double curTime
 int ProtocolEnforcer::getReportPseudoes(double curTime, unsigned long * pseudosList){
     int reportCount = 0;
     for (int var = 0; var < reportedPseudosNum; ++var) {
-        if((curTime - reportTime[var]) > CollectionPeriod){
+        if((curTime - reportTime[var]) > params->CollectionPeriod){
             pseudosList[reportCount] = reportedPseudos[var];
             reportCount ++;
             reportTime[var] = curTime;
         }
     }
     for (int var = reportedPseudosNum - 1; var >= 0; --var) {
-        if((curTime - lastMisbehavingTime[var]) > (CollectionPeriod + UntolerancePeriod)){
+        if((curTime - lastMisbehavingTime[var]) > (params->CollectionPeriod + params->UntolerancePeriod)){
             removeMisbehavingPseudo(var);
         }
     }
